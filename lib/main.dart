@@ -628,6 +628,57 @@ class ScrollingColumnState extends State<ScrollingColumn> with SingleTickerProvi
     );
   }
 }
+bool _isCelebrationActive = false;
+
+void _showCelebrationWidget(BuildContext context) {
+  if (_isCelebrationActive) return; // Avoid showing multiple celebrations
+  _isCelebrationActive = true;
+
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (BuildContext context) {
+      return CelebrationDialog(
+        onDismiss: () {
+          _isCelebrationActive = false;
+          Navigator.of(context).pop(); // Close the dialog
+        },
+      );
+    },
+  );
+}
+
+class CelebrationDialog extends StatelessWidget {
+  final VoidCallback onDismiss;
+
+  const CelebrationDialog({super.key, required this.onDismiss});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Colors.transparent,
+      child: const Stack(
+        alignment: Alignment.center,
+        children: [
+          // Placeholder for animated balloons or confetti
+         
+          Positioned(
+            child: Text(
+              "🎉 Credits Added! 🎉",
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class HomePage extends StatefulWidget {
    const HomePage({super.key}); // Super parameter syntax
@@ -639,11 +690,13 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> with RouteAware {
   
   final ApiService apiService = ApiService(); // Create instance
+
 int? credits;
 
   @override
   void initState() {
     super.initState();
+     
       _initializeInAppPurchaseListener();
     _fetchAndSetCredits(); // Fetch credits on initialization
   }
@@ -813,7 +866,7 @@ void _showCreditOptions(BuildContext context) {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  '100 credits',
+                  '250 credits',
                   style: TextStyle(fontSize: 24),
                 ),
                 const Spacer(),
@@ -829,7 +882,7 @@ void _showCreditOptions(BuildContext context) {
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
           
@@ -868,12 +921,12 @@ void _showCreditOptions(BuildContext context) {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  '1000 credits',
+                  '650 credits',
                   style: TextStyle(fontSize: 24),
                 ),
                 const Spacer(),
                 const Text(
-                  '11.99',
+                  '4.99',
                   style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
@@ -884,7 +937,7 @@ void _showCreditOptions(BuildContext context) {
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
 
@@ -923,12 +976,12 @@ void _showCreditOptions(BuildContext context) {
                 ),
                 const SizedBox(width: 12),
                 const Text(
-                  '2500 credits',
+                  '1800 credits',
                   style: TextStyle(fontSize: 24),
                 ),
                 const Spacer(),
                 const Text(
-                  '18.99',
+                  '14.99',
                   style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
@@ -939,7 +992,7 @@ void _showCreditOptions(BuildContext context) {
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('2500_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -1006,6 +1059,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -1019,14 +1073,67 @@ void _initializeInAppPurchaseListener() {
 
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -1035,47 +1142,53 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+    // Purchase validation failed, log error details if necessary
+   
     return false;
   }
 }
 
 
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -1088,7 +1201,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -1922,104 +2035,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
-  void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -2027,6 +2189,7 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -2041,6 +2204,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -2051,17 +2215,67 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+      
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+      
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -2070,47 +2284,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -2123,7 +2341,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -2946,104 +3164,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
- void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -3051,6 +3318,7 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -3061,10 +3329,10 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
  
 StreamSubscription<List<PurchaseDetails>>? _subscription;
-
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -3075,17 +3343,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -3094,47 +3415,52 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+    // Purchase validation failed, log error details if necessary
+   
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -3147,7 +3473,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -3995,97 +4321,146 @@ void _showCreditOptions(BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -4093,6 +4468,8 @@ void _showCreditOptions(BuildContext context) {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -4103,10 +4480,10 @@ void _showCreditOptions(BuildContext context) {
   }
  
 StreamSubscription<List<PurchaseDetails>>? _subscription;
-
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -4117,17 +4494,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -4136,47 +4566,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -4189,7 +4623,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -5080,104 +5514,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
-  void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -5185,6 +5668,8 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -5199,6 +5684,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -5209,17 +5695,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -5228,47 +5767,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -5281,7 +5824,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -6106,104 +6649,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
- void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -6211,6 +6803,8 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -6225,6 +6819,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -6235,17 +6830,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -6254,47 +6902,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -6307,7 +6959,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -7162,104 +7814,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
- void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -7267,6 +7968,7 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -7277,10 +7979,10 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
   
 StreamSubscription<List<PurchaseDetails>>? _subscription;
-
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -7291,17 +7993,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -7310,47 +8065,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -7363,7 +8122,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -8860,104 +9619,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
-  void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -8965,6 +9773,8 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -8979,6 +9789,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -8989,17 +9800,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -9008,47 +9872,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -9061,7 +9929,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -10130,97 +10998,146 @@ void _showCreditOptions(BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -10228,6 +11145,8 @@ void _showCreditOptions(BuildContext context) {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -10242,6 +11161,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -10252,17 +11172,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -10271,47 +11244,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -10324,7 +11301,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -11463,104 +12440,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
- void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -11568,6 +12594,8 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -11582,6 +12610,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -11592,17 +12621,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -11611,47 +12693,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -11664,7 +12750,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
@@ -12738,104 +13824,153 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
   }
 }
 
-  void _showCreditOptions(BuildContext context) {
+void _showCreditOptions(BuildContext context) {
   showModalBottomSheet(
     context: context,
     builder: (BuildContext context) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
+          // 100 Credits option
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
+                const SizedBox(width: 8),
                 Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
+                  'assets/images/credits.png',
+                  width: 60,
                   height: 60,
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '100 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 20), // Spacing
+                const Spacer(),
                 const Text(
-                  '1.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('100_credits');
+              _buyCredits('credit');
             },
           ),
+          
+          // 1000 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '1000 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '11.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('1000_credits');
+              _buyCredits('credit2');
             },
           ),
+
+          // 2500 Credits option with 25% better deal icon
           ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                const SizedBox(width: 8), // Spacing
-                Image.asset(
-                  'assets/images/credits.png', // Credits icon
-                  width: 60, // Adjust size as necessary
-                  height: 60,
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12), // Spacing
+                const SizedBox(width: 12),
                 const Text(
-                  '2500 credits', // Quantity
-                  style: TextStyle(fontSize: 24), // Font size
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
                 ),
-                const SizedBox(width: 18), // Spacing
+                const Spacer(),
                 const Text(
-                  '18.99', // Price
-                  style: TextStyle(fontSize: 16), // Font size
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
                 ),
                 const Icon(
-                  Icons.attach_money, // Money icon
+                  Icons.attach_money,
                   size: 24,
                 ),
               ],
             ),
             onTap: () {
               Navigator.pop(context);
-              _buyCredits('4000_credits');
+              _buyCredits('credit1');
             },
           ),
         ],
@@ -12843,6 +13978,8 @@ Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
     },
   );
 }
+
+
 
  void _showSnackBar(BuildContext context, String message) {
     if (context.mounted) {
@@ -12857,6 +13994,7 @@ StreamSubscription<List<PurchaseDetails>>? _subscription;
 void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
+
       _listenToPurchaseUpdated(purchaseDetailsList);
     },
     onDone: () => _subscription?.cancel(),
@@ -12867,17 +14005,70 @@ void _initializeInAppPurchaseListener() {
     },
   );
 }
-
 void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
   for (var purchaseDetails in purchaseDetailsList) {
-    if (purchaseDetails.status == PurchaseStatus.purchased) {
-      _handlePurchaseSuccess(purchaseDetails);
-    } else if (purchaseDetails.status == PurchaseStatus.error) {
-      _showSnackBar(context, 'Purchase failed');
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
     }
   }
 }
 
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
 void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
@@ -12886,47 +14077,51 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
     final success = await _sendReceiptToBackend(receipt);
 
     if (success) {
-        if (mounted) {
-      _fetchAndSetCredits(); // Refresh credits if validation succeeds
-      _showSnackBar(context, 'Purchase validated and credits added');
-        }
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
     } else {
-        if (mounted) {
-      _showSnackBar(context, 'Purchase validation failed');
-        }
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
     }
   } else {
-      if (mounted) {
-    _showSnackBar(context, 'No receipt data available');
-      }
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
   }
 
-  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark the purchase as complete
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
+
 Future<bool> _sendReceiptToBackend(String receipt) async {
-  final token = await apiService.getToken(); // Get your user’s authentication token for secure backend communication
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
   final response = await http.post(
-    Uri.parse('https://www.aimaker.world.com/validate'),
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Include the token if required
+      'Authorization': 'Bearer $token', // Include token if required
     },
     body: jsonEncode({
-      'receipt_data': receipt,
+      'receipt_data': receipt, // Only send receipt data
     }),
   );
 
-  // Check if the backend confirms the purchase as valid
+  // Check if the backend confirms the purchase based on status code
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['success'] ?? false;
+    // Purchase validation succeeded
+    return true;
   } else {
+
     return false;
   }
 }
 
-
   void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
      if (mounted) {
@@ -12939,7 +14134,7 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
-  
+
   if (response.notFoundIDs.isNotEmpty) {
     if (mounted) {
     _showSnackBar(context, 'Product not found.');
