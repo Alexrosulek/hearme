@@ -64,5 +64,13 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	 <key>NSAppleMusicUsageDescription</key>
+    <string>This app does not access Apple Music data, but a required purpose string has been added to comply with App Store guidelines.</string>
+
+    <key>NSMotionUsageDescription</key>
+    <string>This app does not access motion data, but a required purpose string has been added to comply with App Store guidelines.</string>
+
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app does not use speech recognition, but a required purpose string has been added to comply with App Store guidelines.</string>
 </dict>
 </plist>
