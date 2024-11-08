@@ -15,6 +15,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import 'package:flutter/services.dart'; // Add this import
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -84,10 +85,10 @@ late Completer<bool> _callbackCompleter; // Completer to control callback flow
   @override
   void initState() {
     super.initState();
-
   _callbackCompleter = Completer<bool>();
-    _initializeLoginFlow();
+  _initializeLoginFlow();
   }
+  
 @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -183,6 +184,7 @@ Future<void> _startRefreshCallback() async {
       } else {
       }
     } catch (e) {
+
     }
   });
 }
@@ -214,6 +216,49 @@ Future<void> _startRefreshCallback() async {
   });
 }
 
+Future<void> _loginWithApple() async {
+    try {
+      // Request Apple ID Credential
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      // Send the `identityToken` to the backend
+      final success = await _sendAppleTokenToBackend(credential.identityToken);
+      if (success) {
+        _navigateToHomePage(); // Navigate to home page on successful login
+      } else {
+        _showMessage("Apple login failed. Please try again.");
+      }
+    } catch (e) {
+      _showMessage("Apple sign-in not available. ${e.toString()}");
+    }
+  }
+
+  Future<bool> _sendAppleTokenToBackend(String? identityToken) async {
+    if (identityToken == null) return false; // No token to send
+
+    final response = await http.post(
+      Uri.parse('https://www.aimaker.world/auth/apple/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'token': identityToken}),
+    );
+
+   if (response.statusCode == 200) {
+
+    final responseData = jsonDecode(response.body);
+    final backendToken = responseData['token'];  // Get the token from the backend's response
+    if (backendToken != null) {
+      await apiService.saveToken(backendToken);  // Save token to shared preferences
+      return true;
+    }
+
+  }
+  return false;
+}
 
 void _stopPolling() {
   if (!isPolling) return; // Avoid unnecessary calls
@@ -397,7 +442,12 @@ isLaunchingBrowser = true; // Mark that we're launching a browser
                       children: [
                         ElevatedButton(
                           onPressed: _loginWithGoogle,
-                          child: const Text('Login or Register with Google'),
+                          child: const Text('Login/Register with Google'),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: _loginWithApple,
+                          child: const Text('Login/Register with Apple'),
                         ),
                         const SizedBox(height: 8),
                        ElevatedButton(

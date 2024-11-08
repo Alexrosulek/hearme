@@ -64,6 +64,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSFaceIDUsageDescription</key>
+<string>This app does not use Face ID or facial recognition data, but a required purpose string has been added to comply with App Store guidelines.</string>
+
 	 <key>NSAppleMusicUsageDescription</key>
     <string>This app does not access Apple Music data, but a required purpose string has been added to comply with App Store guidelines.</string>
 
