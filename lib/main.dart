@@ -231,13 +231,17 @@ Future<void> _loginWithApple() async {
       if (success) {
         _navigateToHomePage(); // Navigate to home page on successful login
       } else {
-        _showMessage("Apple login failed. Please try again.");
-      }
-    } catch (e) {
-      _showMessage("Apple sign-in not available. ${e.toString()}");
-    }
-  }
+      // Retry if the first attempt failed
+      final success = await _sendAppleTokenToBackend(credential.identityToken);
 
+      if (success) {
+        _navigateToHomePage();
+      } else {
+      }
+    }
+  } catch (e) {
+  }
+}
   Future<bool> _sendAppleTokenToBackend(String? identityToken) async {
     if (identityToken == null) return false; // No token to send
 
