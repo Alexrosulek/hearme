@@ -15571,7 +15571,7 @@ Widget buildDropdown() {
       children: [
         const Center(
           child: Text(
-            'Model:',
+            'Format:',
             style: TextStyle(fontSize: 16),
             textAlign: TextAlign.center, // Center-align the label text
           ),
