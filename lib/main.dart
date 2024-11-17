@@ -15788,7 +15788,7 @@ Widget build(BuildContext context,{bool isHomePage = false}) {
           _buildHorizontalList(context),
           const SizedBox(height: 24),
             const Text(
-              'Resize and Convert',
+              'Size/Convert',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontFamily: 'CustomFontName',  // Use your custom font here
