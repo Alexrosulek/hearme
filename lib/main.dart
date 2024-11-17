@@ -55,6 +55,8 @@ class MyApp extends StatelessWidget {
        '/img2img': (context) => const Img2ImgPage(), // Remove Background Page route
         '/txt2vid': (context) => const Txt2VidPage(), // Remove Background Page route
        '/img2vid': (context) => const Img2VidPage(), // Remove Background Page route
+
+       '/convert': (context) => const ConvertPage(), // Remove Background Page route
       '/home': (BuildContext context)  => const HomePage(),
        '/settings': (context) => const SettingsPage(),
       },
@@ -1251,7 +1253,6 @@ Future<bool> _sendReceiptToBackend(String receipt) async {
      }
     return;
   }
-
   // Define product identifiers
   const Set<String> productIds = {'credit', 'credit2', 'credit1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
@@ -1318,6 +1319,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -2431,6 +2435,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -3563,6 +3570,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -4716,6 +4726,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -5915,6 +5928,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -7049,6 +7065,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -8214,6 +8233,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -10018,6 +10040,9 @@ _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2im
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -11390,6 +11415,9 @@ _buildServiceTile('Text-> Image',"assets/images/txt2img.png", context, '/txt2img
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -11544,7 +11572,7 @@ Widget buildSlider() {
 }),
 buildNumberInput('Height:', height, 'Max: 2048 / Min: 256', (value) {
   int? val = int.tryParse(value);
-  if (val != null && val >= 256 && val <= 2058) {
+  if (val != null && val >= 256 && val <= 2048) {
     setState(() => height = val);
   }
 }),
@@ -12838,6 +12866,9 @@ _buildServiceTile('Text-> Image',"assets/images/txt2img.png", context, '/txt2img
 _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2img'),
 
 _buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+
+_buildServiceTile('Size/Convert', "assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -14222,6 +14253,8 @@ _buildServiceTile('Text-> Image',"assets/images/txt2img.png", context, '/txt2img
 _buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2img'),
 
 _buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
+
+_buildServiceTile('Size/Convert',"assets/images/convert.png", context, '/convert'),
         ],
       ),
     );
@@ -14838,3 +14871,1177 @@ Future<bool> _deleteAccount() async {
   }
 }
 
+
+class ConvertPage extends StatefulWidget {
+  const ConvertPage({super.key}); // Super parameter syntax
+
+  @override
+  ConvertPageState createState() => ConvertPageState();
+}
+
+class ConvertPageState extends State<ConvertPage> with RouteAware {
+ bool _isGenerateEnabled = false; // Manage generate button state
+ File? _imageFile;
+
+  bool _isInformationVisible = false;
+ bool _isLastInputInvalid = false; //
+  bool _isLoading = false;
+  Uint8List? _imageBytes;
+  bool _isLoggedIn = false;
+  int? credits;
+  int width = 1024;
+  int height = 1024;
+
+  String _selectedModel = '1';
+  bool _isAdvancedVisible = false;
+
+ 
+  final ApiService apiService = ApiService(); // Create instance
+
+  @override
+  void initState() {
+    super.initState();
+
+      _initializeInAppPurchaseListener();
+    _checkLoginStatus();
+   _fetchAndSetCredits(); // Fetch credits on initialization
+  }
+    
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+@override
+  void didPopNext() {
+    // This method is called when the user returns to this page.
+   
+    _fetchAndSetCredits(); // Reload credits
+  }
+  
+    @override
+  void dispose() {
+ if (mounted) {
+  scaffoldMessengerKey.currentState?.hideCurrentSnackBar();
+  scaffoldMessengerKey.currentState?.hideCurrentMaterialBanner(); // Clear any remaining SnackBars
+   
+  } // Clear Material Banners
+   _subscription?.cancel();
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+  Future<void> _fetchAndSetCredits() async {
+    if (!mounted) return;
+    credits = await apiService._fetchCredits();
+    if (mounted) {
+      setState(() {
+        credits = credits;
+      });
+    }
+  }
+
+  Future<void> _checkLoginStatus() async {
+if (!mounted) return;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('jwt_token');
+    if (mounted) {
+    setState(() {
+        _isLoggedIn = token != null;
+      if (token != null){
+        credits = null;
+      }
+    });
+    }
+  }
+void _showLoginDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Login Required"),
+        content: const Text("Please log in to use this feature."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Dismiss the dialog
+            },
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Dismiss the dialog
+              if (mounted) {
+              Navigator.pushNamed(context, '/login'); // Navigate to login
+              }
+            },
+            child: const Text("Log In"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('jwt_token');
+  }
+  
+Future<void> _generateConvertImage() async {
+  if (!_isLoggedIn) {
+    _showLoginDialog(context);
+    return;
+  }
+
+  if (_imageFile == null) {
+    _showMessage('No image selected!');
+    return;
+  }
+
+  setState(() {
+    _isLoading = true;
+  });
+
+  try {
+    final token = await getToken();
+    if (token == null) return;
+
+    // Build multipart request
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://www.aimaker.world/convert-resize/'),
+    );
+    request.headers['Authorization'] = 'Bearer $token';
+    request.files.add(await http.MultipartFile.fromPath('image', _imageFile!.path));
+
+    // Add dimensions and format
+    request.fields['width'] = width.toString();
+    request.fields['height'] = height.toString();
+    request.fields['format'] = _getModelValue();
+
+    // Send request
+    final response = await request.send();
+    final responseData = await response.stream.toBytes();
+
+    if (response.statusCode == 200) {
+      // Update image bytes with the converted image
+      setState(() {
+        _imageBytes = responseData;
+        _isGenerateEnabled = false; // Disable Generate button
+        _imageFile = null; // Clear uploaded image
+      });
+      _showMessage('Image resized and converted successfully!');
+    } else {
+      _showMessage('Failed to process the image. Try again.');
+    }
+  } catch (e) {
+    _showMessage('Error: ${e.toString()}');
+  } finally {
+    setState(() {
+      _isLoading = false;
+    });
+  }
+}
+
+  void _showMessage(String message) {
+       if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+       }
+  }
+ 
+
+
+Widget _buildLogoutButton(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: apiService.isLoggedIn(),
+      builder: (context, snapshot) {
+    
+
+        final isLoggedIn = snapshot.data ?? false;
+
+       return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.deepPurple,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () async => _handleLoginOrLogout(context, isLoggedIn),
+        child: Text(isLoggedIn ? 'Logout' : 'Login'),
+      );
+    },
+  );
+}Widget _buildServiceTile(String title, String imagePath, BuildContext context, String route) {
+  return GestureDetector(
+    onTap: () {
+      if (mounted) {
+      Navigator.pushNamed(context, route);
+      }
+    },
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Circular image container
+        Container(
+          width: 70,
+          height: 65,
+          margin: const EdgeInsets.symmetric(horizontal: 8.0),  // Horizontal spacing only
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white,
+          ),
+          child: ClipOval(
+            child: imagePath.endsWith('.png')
+                ? Image.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                    width: 50,
+                    height: 50,
+                  )
+                : SvgPicture.asset(
+                    imagePath,
+                    fit: BoxFit.contain,
+                    width: 50,
+                    height: 50,
+                  ),
+          ),
+        ),
+        // Title below the circle with custom font
+        Padding(
+          padding: const EdgeInsets.only(top: 4.0),
+          child: Text(
+            title.replaceAll(' ', '\n'),  // Replaces spaces with line breaks
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 12,  // Small font size
+              fontWeight: FontWeight.bold,
+              fontFamily: 'CustomFontName',  // Use your font family here
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  void _navigateToHomePage(BuildContext context) {
+    if (context.mounted) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomePage(), // Navigate to HomePage
+      ),
+    );
+    }
+  }
+
+void _navigateToLoginPage(BuildContext context) {
+  // Ensure widget is still mounted before navigating
+  if (context.mounted) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false, // Remove all routes to prevent back navigation
+    );
+  }
+}
+Future<void> _handleLoginOrLogout(BuildContext context, bool isLoggedIn) async {
+  try {
+    if (isLoggedIn) {
+      final success = await apiService.logout(context);
+      if (success) {
+        if (context.mounted) {
+          _navigateToLoginPage(context); // Navigate after logout
+        }
+      } else {
+        if (context.mounted) {
+          _showSnackBar(context, 'Logout failed. Please try again.');
+        }
+      }
+    } else {
+      final success = await apiService.loginWithToken();
+      if (success) {
+        if (context.mounted) {
+          _navigateToHomePage(context); // Navigate after login
+        }
+      } else {
+        if (context.mounted) {
+          _navigateToLoginPage(context); // Navigate after not login
+        }
+      }
+    }
+  } catch (e) {
+ 
+    if (context.mounted) {
+      _showSnackBar(context, 'Failed, Please try again.');
+    }
+  }
+}
+void _showCreditOptions(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          // 100 Credits option
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 8),
+                Image.asset(
+                  'assets/images/credits.png',
+                  width: 60,
+                  height: 60,
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '250 credits',
+                  style: TextStyle(fontSize: 24),
+                ),
+                const Spacer(),
+                const Text(
+                  '1.99', // Adjusted price for alignment
+                  style: TextStyle(fontSize: 16),
+                ),
+                const Icon(
+                  Icons.attach_money,
+                  size: 24,
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _buyCredits('credit');
+            },
+          ),
+          
+          // 1000 Credits option with 25% better deal icon
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'More credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '650 credits',
+                  style: TextStyle(fontSize: 24),
+                ),
+                const Spacer(),
+                const Text(
+                  '4.99',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const Icon(
+                  Icons.attach_money,
+                  size: 24,
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _buyCredits('credit2');
+            },
+          ),
+
+          // 2500 Credits option with 25% better deal icon
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const SizedBox(width: 8),
+                Stack(
+                  children: [
+                    Image.asset(
+                      'assets/images/credits.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Positioned(
+                      top: 1,
+                      right: 1,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Most Credits+',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 7,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 12),
+                const Text(
+                  '1800 credits',
+                  style: TextStyle(fontSize: 24),
+                ),
+                const Spacer(),
+                const Text(
+                  '14.99',
+                  style: TextStyle(fontSize: 16),
+                ),
+                const Icon(
+                  Icons.attach_money,
+                  size: 24,
+                ),
+              ],
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _buyCredits('credit1');
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
+
+ void _showSnackBar(BuildContext context, String message) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+  
+StreamSubscription<List<PurchaseDetails>>? _subscription;
+
+void _initializeInAppPurchaseListener() {
+  _subscription = InAppPurchase.instance.purchaseStream.listen(
+    (List<PurchaseDetails> purchaseDetailsList) {
+
+      _listenToPurchaseUpdated(purchaseDetailsList);
+    },
+    onDone: () => _subscription?.cancel(),
+    onError: (error) {
+        if (mounted) {
+      _showSnackBar(context, 'Purchase error: $error');
+        }
+    },
+  );
+}
+void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+  for (var purchaseDetails in purchaseDetailsList) {
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
+    }
+  }
+}
+
+
+
+void _showDisputeSnackBar3(BuildContext context) {
+  if (!mounted) return;
+  final snackBar = SnackBar(
+    content: const Text("Something went wrong. If you believe you shouldn't have been charged, please contact us."),
+    action: SnackBarAction(
+      label: "Contact",
+      onPressed: () async {
+        final url = Uri.parse('https://www.aimaker.world/contact?subject=');
+        if (await canLaunchUrl(url)) {
+          await launchUrl(
+            url,
+            mode: LaunchMode.inAppWebView, // Opens in-app web view
+          );
+        } else {
+          throw 'Could not launch $url';
+        }
+      },
+    ),
+    duration: const Duration(seconds: 5),
+    behavior: SnackBarBehavior.floating,
+    margin: const EdgeInsets.only(bottom: 20, left: 20, right: 20),
+  );
+
+  if (mounted) { // Check right before showing the SnackBar
+  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+}
+
+  // Show "Common Problems" banner with a timer for automatic dismissal
+   
+}
+void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
+  if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
+    final receipt = purchaseDetails.verificationData.serverVerificationData;
+
+    // Send receipt to the backend for validation
+    final success = await _sendReceiptToBackend(receipt);
+
+    if (success) {
+      if (mounted) {
+        _fetchAndSetCredits(); // Refresh credits if validation succeeds
+        _showCelebrationWidget(context); // Show celebration widget
+      }
+    } else {
+      if (mounted && !_isCelebrationActive) {
+        _showDisputeSnackBar3(context);
+      }
+    }
+  } else {
+    if (mounted && !_isCelebrationActive) {
+      _showDisputeSnackBar3(context);
+    }
+  }
+
+  InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
+}
+
+Future<bool> _sendReceiptToBackend(String receipt) async {
+  final token = await apiService.getToken(); // Retrieve user’s authentication token
+
+  final response = await http.post(
+    Uri.parse('https://www.aimaker.world/validate_receipt/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token', // Include token if required
+    },
+    body: jsonEncode({
+      'receipt_data': receipt, // Only send receipt data
+    }),
+  );
+
+  // Check if the backend confirms the purchase based on status code
+  if (response.statusCode == 200) {
+    // Purchase validation succeeded
+    return true;
+  } else {
+
+    return false;
+  }
+}
+
+  void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
+
+  final bool available = await InAppPurchase.instance.isAvailable();
+  if (!available) {
+     if (mounted) {
+     
+    _showSnackBar(context, 'In-App Purchases are not available.');
+     }
+    return;
+  }
+
+  // Define product identifiers
+  const Set<String> productIds = {'credit', 'credit2', 'credit1'};
+  final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
+
+  if (response.notFoundIDs.isNotEmpty) {
+    if (mounted) {
+    _showSnackBar(context, 'Product not found.');
+    }
+    return;
+  }
+
+  // Identify the correct product details for the requested ID
+  final ProductDetails productDetails = response.productDetails.firstWhere((product) => product.id == productId);
+  final PurchaseParam purchaseParam = PurchaseParam(productDetails: productDetails);
+
+  // Initiate purchase
+  InAppPurchase.instance.buyConsumable(purchaseParam: purchaseParam);
+}
+    Widget _buildHorizontalList(BuildContext context) {
+    return SizedBox(
+      height: 103,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        children: [
+     _buildServiceTile('Doodle',"assets/images/doodle.png", context, '/doodle'),
+            _buildServiceTile('Remove Background',"assets/images/bgremoval.png", context, '/background-removal'),
+  _buildServiceTile('Replace Background',"assets/images/bgreplace.png", context, '/background-replace'),
+ _buildServiceTile('Face Swap',"assets/images/mergefaces.png", context, '/merge-faces'),
+ _buildServiceTile('Restore Face',"assets/images/resface.png", context, '/restore-face'),
+  _buildServiceTile('Remove Watermark',"assets/images/wmremoval.png", context, '/watermark-removal'),
+_buildServiceTile('Remove Text',"assets/images/txtremoval.png", context, '/text-removal'),
+
+
+_buildServiceTile('Text-> Image',"assets/images/txt2img.png", context, '/txt2img'),
+_buildServiceTile('Image-> Image',"assets/images/img2img.png", context, '/img2img'),
+
+_buildServiceTile('Image-> Video',"assets/images/img2vid.png", context, '/img2vid'),
+
+_buildServiceTile('Text-> Video',"assets/images/txt2vid.png", context, '/txt2vid'),
+
+        ],
+      ),
+    );
+  }
+Future<void> _downloadImage() async {
+  if (_imageBytes == null) return;
+
+  // Request photo library permission.
+  final status = await Permission.photos.request();
+  if (status.isGranted) {
+    try {
+      // Save the image to the photo gallery.
+      final result = await ImageGallerySaver.saveImage(
+        Uint8List.fromList(_imageBytes!),
+        quality: 100,
+        name: "COVERTED_image",
+      );
+
+      if (result['isSuccess']) {
+        if (mounted) {
+        _showMessage('Successfully saved to photos.');
+        }
+      } else {
+        if (mounted) {
+        _showMessage('Failed to save.');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+      _showMessage('Failed to save.');
+      }
+    }
+  } else {
+    if (mounted) {
+     _showMessage('Enable photo library permissions for this app in settings to download!');
+    }
+  }
+}
+  
+Widget buildDropdown() {
+  return Center(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.center, // Center-align content within the column
+      children: [
+        const Center(
+          child: Text(
+            'Model:',
+            style: TextStyle(fontSize: 16),
+            textAlign: TextAlign.center, // Center-align the label text
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          margin: const EdgeInsets.symmetric(vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.deepPurple, width: 1.5),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(2, 3),
+              ),
+            ],
+          ),
+          child: DropdownButton<String>(
+            isExpanded: true,
+            underline: Container(),
+            value: _selectedModel, // Ensure this matches one of the items
+            items: const [
+              DropdownMenuItem(value: '1', child: Center(child: Text('PNG'))),
+              DropdownMenuItem(value: '2', child: Center(child: Text('JPEG'))),
+              DropdownMenuItem(value: '3', child: Center(child: Text('WEBP'))),
+            ],
+            onChanged: (value) {
+              if (value != null && mounted) {
+                setState(() {
+                  _selectedModel = value;
+                });
+              }
+            },
+            icon: const SizedBox.shrink(),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+  
+ String _getModelValue() {
+  switch (_selectedModel) {
+    case '1':
+      return 'PNG';
+    case '2':
+      return 'JPEG';
+    case '3':
+      return 'WEBP';
+    default:
+      return 'PNG'; // Default to PNG if no valid option is selected
+  }
+}
+
+ Widget buildAdvancedOptions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+      
+            const SizedBox(height: 8),
+     buildNumberInput('Width:', width, 'Max: 2048 ', (value) {
+  int? val = int.tryParse(value);
+  if (val != null && val <= 2048) {
+    setState(() => width = val);
+  }
+}),
+buildNumberInput('Height:', height, 'Max: 2048 ', (value) {
+  int? val = int.tryParse(value);
+ if (val != null && val > 0 && val <= 2048) {
+  setState(() => width = val);
+} else {
+  _showMessage('Value must be between 1 and 2048.');
+}
+
+}),
+
+ 
+       
+        buildDropdown(),
+      ],
+    );
+  }
+     Widget _buildInformationSection() {
+  return Padding(
+    padding: const EdgeInsets.only(top: 8, left: 16), // Adjust top and left padding
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:  [
+        const Text(
+          'Input:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+       const SizedBox(height: 4),
+        const Text('Select an image. Enter a desized format and size.'),
+        const SizedBox(height: 12),
+       const Text(
+          'Result:',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        const SizedBox(height: 4),
+        const Text('Resized and Converted image.'),
+    const SizedBox(height: 12),
+              Center(  // Center the button within the column
+          child: ElevatedButton(
+            onPressed: () async {
+              final url = Uri.parse('https://www.aimaker.world/pricing');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(
+                  url,
+                  mode: LaunchMode.inAppWebView,
+                );
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: const Text('Pricing'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Center(  // Center the button within the column
+          child: ElevatedButton(
+            onPressed: () async {
+              final url = Uri.parse('https://www.aimaker.world/help');
+              if (await canLaunchUrl(url)) {
+                await launchUrl(
+                  url,
+                  mode: LaunchMode.inAppWebView,
+                );
+              } else {
+                throw 'Could not launch $url';
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size.fromHeight(40),
+            ),
+            child: const Text('More info'),
+          ),
+        ),
+        
+      ],
+    ),
+  );
+}
+
+
+
+  @override
+Widget build(BuildContext context,{bool isHomePage = false}) {
+  return Scaffold(
+    appBar: AppBar(
+       automaticallyImplyLeading: false,
+      backgroundColor: const Color(0xFFF5F5F5),
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+      
+         GestureDetector(
+          onTap: () {
+            if (!isHomePage) {
+              if (mounted) {
+              Navigator.pushReplacementNamed(context, '/home');
+              }
+            }
+          },
+          child: Image.asset(
+                'assets/images/logo.png',
+                height: 40,fit: BoxFit.contain,
+              ),
+        ),
+        IconButton(
+        icon: const Icon(Icons.settings),
+        onPressed: () {
+          if (mounted) {
+          Navigator.pushNamed(context, '/settings');
+          }
+        },
+      ),const Spacer(),
+          
+          if (credits != null)
+            ElevatedButton(
+              onPressed: () {
+                _showCreditOptions(context);
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.deepPurple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text('Credits: ${credits ?? 0}'),
+            ),
+
+          const Spacer(),
+          _buildLogoutButton(context),
+        ],
+      ),
+    ),
+     backgroundColor: const Color(0xFFF5F5F5),
+    body: SingleChildScrollView(
+      
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+       
+          _buildHorizontalList(context),
+          const SizedBox(height: 24),
+            const Text(
+              'Resize and Convert',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'CustomFontName',  // Use your custom font here
+                fontSize:25,                  // Adjust font size as needed
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+             const SizedBox(height: 3),
+
+          // Improved Image Container
+          Container(
+            height: 300,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.deepPurple, width: 2),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  spreadRadius: 2,
+                  blurRadius: 8,
+                  offset: const Offset(2, 4), // Shadow position
+                ),
+              ],
+            ),
+             child: ClipRRect(
+    borderRadius: BorderRadius.circular(12),
+    child: _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+            ),
+          )
+        : _imageBytes != null
+            ? Image.memory(
+                _imageBytes!,
+                fit: BoxFit.cover,
+              )
+            : _imageFile != null
+                ? Image.file(
+                    _imageFile!,
+                    fit: BoxFit.cover,
+                  )
+                : const Center(
+                    child: Text(
+                      'Resize/Convert an image',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+  ),
+),
+           
+          const SizedBox(height: 16),
+      Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _pickImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 134, 92, 207),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Upload',
+                    style: TextStyle(color: Colors.black),),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  
+                  onPressed: _isLoading || _imageFile == null || !_isGenerateEnabled
+                      ? null
+                      : _generateConvertImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 134, 92, 207),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Generate',
+                    style: TextStyle(color: Colors.black, fontSize: 13.55)),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: _isLoading || _imageBytes == null
+                      ? null
+                      : _downloadImage,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 134, 92, 207),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Download',
+                    style: TextStyle(color: Colors.black, fontSize: 12.59)),
+                ),
+              ),
+            ],
+          ),
+             const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                if (mounted) {
+                setState(() {
+                  _isAdvancedVisible = !_isAdvancedVisible;
+                });
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              child: const Text('Advanced Options'),
+            ),
+            if (_isAdvancedVisible) buildAdvancedOptions(),
+              
+          const SizedBox(height: 16),
+          // Button Row
+        
+
+          // Cost Display
+             ElevatedButton(
+              onPressed: () {
+                if (mounted) {
+                setState(() {
+                  _isInformationVisible = !_isInformationVisible;
+                });
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+              ),
+              child: const Text('Information'),
+            ),
+            if (_isInformationVisible) _buildInformationSection(),
+        ],
+      ),
+    ),
+  );
+}
+ Widget buildTextField(String label, String hint, Function(String) onChanged) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          border: const OutlineInputBorder(),
+        ),
+        onChanged: onChanged,
+      ),
+    );
+  }
+ Widget buildNumberInput(String label, int? value, String hint, Function(String) onChanged) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    child: TextField(
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        border: const OutlineInputBorder(),
+      ),
+      onChanged: (input) {
+        // Check if input is empty or a number
+        if (input.isEmpty || int.tryParse(input) != null) {
+          _isLastInputInvalid = false; // Reset the invalid flag
+          onChanged(input); // Trigger callback for number or empty input
+        } else if (!_isLastInputInvalid) {
+          if (mounted) {
+          _showMessage('Please enter a number.');
+          }
+          _isLastInputInvalid = true; // Mark as invalid to prevent further spam
+        }
+      },
+    ),
+  );
+}
+
+
+Future<void> _pickImage() async {
+  if (!mounted) return;
+   final status = await Permission.photos.request();
+  if (status.isGranted) {
+  
+  try {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 2048,
+      maxHeight: 2048,
+      preferredCameraDevice: CameraDevice.rear,
+      imageQuality: 85, // Reduce size for compatibility
+    );
+
+    if (pickedFile != null) {
+     
+        if (mounted) {
+    setState(() {
+  _imageFile = File(pickedFile.path);
+  _imageBytes = null;
+  _isGenerateEnabled = true; // Enable the generate button
+});
+
+        
+    }
+    }
+  } catch (e) {
+    if (mounted) {
+    _showMessage('Image too large, Max: 1024x1024px');
+    }
+  }
+   } else {
+    if (mounted) {
+    _showMessage('Enable photo library permissions for this app in settings to upload!');
+    }
+  }
+}
+
+
+
+
+Widget buildSliderInput(String label, double currentValue, double min, double max, Function(double) onChanged) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center, // Center-align content within the column
+    children: [
+      Center( // Center-align the label text
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 16),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      Slider(
+        value: currentValue,
+        min: min,
+        max: max,
+        divisions: max.toInt(),
+        label: currentValue.toStringAsFixed(1),
+        onChanged: onChanged,
+      ),
+    ],
+  );
+}
+
+
+
+}
