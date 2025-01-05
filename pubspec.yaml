@@ -32,25 +32,37 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  google_fonts: ^4.0.3
+  lottie: ^2.0.0
+  video_player: ^2.5.0
+  audio_waveforms: ^1.0.0
+  uuid: ^4.2.1
   shelf: ^1.4.0
+  flutter_animate: ^4.0.0 
   shared_preferences: ^2.1.0
   http: ^0.13.5
   flutter_gen: ^4.1.2
   url_launcher: ^6.1.7
   cupertino_icons: ^1.0.8
   app_links: ^3.0.0
+  audioplayers: ^5.2.0
   webview_flutter: ^4.10.0
   sign_in_with_apple: ^4.1.0
+
+  just_audio: ^0.9.36
   shared_preferences_foundation: ^2.0.0
   flutter_launcher_icons: ^0.9.2
-  image_picker: ^0.8.7+3
+  flutter_sound: ^9.0.1  
   in_app_purchase: ^2.0.1
+  
+  confetti: ^0.7.0 # Specify the latest version available
+  web_socket_channel: ^2.4.0
   image: ^3.0.1
   path_provider: ^2.0.11
   flutter_svg: ^2.0.7
-  image_gallery_saver: ^1.7.1
+
   permission_handler: ^11.1.0  # Add this line
-  video_player: ^2.5.1 
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -82,91 +94,16 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/logo.png
-  # PNG images 1 to 20
-    - assets/images/1.png
-    - assets/images/2.png
-    - assets/images/3.png
-    - assets/images/4.png
-    - assets/images/5.png
-    - assets/images/6.png
-    - assets/images/7.png
-    - assets/images/8.png
-    - assets/images/9.png
-    - assets/images/10.png
-    - assets/images/11.png
-    - assets/images/12.png
-    - assets/images/13.png
-    - assets/images/14.png
-    - assets/images/15.png
-    - assets/images/16.png
-    - assets/images/17.png
-    - assets/images/18.png
-    - assets/images/19.png
-    - assets/images/20.png
-    - assets/images/21.png
-    - assets/images/22.png
-    - assets/images/23.png
-    - assets/images/24.png
-    - assets/images/25.png
-    - assets/images/26.png
-    - assets/images/27.png
-    - assets/images/28.png
-    - assets/images/29.png
-    - assets/images/30.png
-    - assets/images/31.png
-    - assets/images/32.png
-    - assets/images/33.png
-    - assets/images/34.png
-    - assets/images/35.png
-    - assets/images/36.png
-    - assets/images/37.png
-    - assets/images/38.png
-    - assets/images/39.png
-    - assets/images/40.png
-    - assets/images/41.png
-    - assets/images/42.png
-    - assets/images/43.png
-    - assets/images/44.png
-    - assets/images/45.png
-    - assets/images/46.png
-    - assets/images/47.png
-    - assets/images/48.png
-    - assets/images/49.png
-    - assets/images/50.png
-
-    # GIF images 1 to 11
-    - assets/images/1.gif
-    - assets/images/2.gif
-    - assets/images/3.gif
-    - assets/images/4.gif
-    - assets/images/5.gif
-    - assets/images/6.gif
-    - assets/images/7.gif
-    - assets/images/8.gif
-    - assets/images/9.gif
-    - assets/images/10.gif
-    - assets/images/11.gif
-    - assets/images/bgremoval.png
-    - assets/images/bgreplace.png
-    - assets/images/resface.png
-    - assets/images/wmremoval.png
-    - assets/images/txtremoval.png
-    - assets/images/mergefaces.png
-    - assets/images/doodle.png
-    - assets/images/txt2img.png
-    - assets/images/img2img.png
-    - assets/images/txt2vid.png
-    - assets/images/img2vid.png
-    - assets/images/convert.png
-
-    - assets/images/image1.png
-    - assets/images/image2.png
-    - assets/images/image3.png
-    - assets/images/image4.gif
-
+    - assets/images/settingicon.png
+    - assets/images/buddy-icon.png
+   
+    - assets/images/icon2text.png
+    - assets/images/profileicon.png
+    - assets/images/chart.png
+    - assets/images/knowledicon.png
     - assets/images/credits.png
-
+    - assets/video.mp3
+    - assets/video.gif
 
 
     - ios/Runner/client_234046892193-1lnvse0vbiv030sli5qskrtg04vf7n2p.apps.googleusercontent.com.plist
