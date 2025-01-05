@@ -2,14 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-<string>Transcribe &amp; Talk</string>
-
+	<string>Transcribe &amp; Talk</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -19,7 +17,7 @@
 	<key>CFBundleName</key>
 	<string>hearme</string>
 	<key>UIRequiresFullScreen</key>
-    <true/>
+	<true/>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -67,18 +65,14 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSFaceIDUsageDescription</key>
-<string>This app does not use Face ID or facial recognition data directly, but will connnect you to apple servers for face id apple login authentication.</string>
-
-	 <key>NSAppleMusicUsageDescription</key>
-    <string>This app does not access Apple Music data, but a required purpose string has been added to comply with App Store guidelines.</string>
-
-    <key>NSMotionUsageDescription</key>
-    <string>This app does not access motion data, but a required purpose string has been added to comply with App Store guidelines.</string>
-
-    <key>NSSpeechRecognitionUsageDescription</key>
-    <string>This app does not use speech recognition, but a required purpose string has been added to comply with App Store guidelines.</string>
+	<string>This app does not use Face ID or facial recognition data.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This app does not access Apple Music data.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app does not access motion data.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We use speech recognition to help you transcribe conversations in real-time for use with our services, we do not store or keep this information.</string>
 	<key>NSMicrophoneUsageDescription</key>
-<string>We need access to the microphone for audio recording for use with our services, we do not store or keep this information.</string>
-
+	<string>We need access to the microphone for audio recording for use with our services, we do not store or keep this information.</string>
 </dict>
 </plist>
