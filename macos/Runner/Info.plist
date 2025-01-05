@@ -5,7 +5,7 @@
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
-    <string>aimaker</string>
+    <string>hearme</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
@@ -28,7 +28,7 @@
             <string>com.example.myapp</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>aimaker</string>
+                <string>hearme</string>
             </array>
         </dict>
     </array>

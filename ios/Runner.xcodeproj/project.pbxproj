@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -514,7 +514,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = aimaker;
+				PRODUCT_BUNDLE_IDENTIFIER = hearme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -531,7 +531,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CHD9B29VE5;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				MARKETING_VERSION = 1.0;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lc++\n-lc++\n-lc++\n-lc++\n-lc++\n-lc++\nl-lc++\n-lc++\n-lc++\n-lc++",
@@ -554,7 +554,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CHD9B29VE5;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				MARKETING_VERSION = 1.0;
 				"OTHER_LDFLAGS[arch=*]" = "-lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = com.example.app.RunnerTests;
@@ -569,15 +569,17 @@
 			baseConfigurationReference = 940040467E3861679B29F377 /* Pods-RunnerTests.profile.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = CHD9B29VE5;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 17;
 				MARKETING_VERSION = 1.0;
 				"OTHER_LDFLAGS[arch=*]" = "-lc++";
 				PRODUCT_BUNDLE_IDENTIFIER = hearme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
@@ -715,7 +717,7 @@
 				);
 				MARKETING_VERSION = 1.0.2;
 				"OTHER_LDFLAGS[arch=*]" = "-lc++";
-				PRODUCT_BUNDLE_IDENTIFIER = aimaker;
+				PRODUCT_BUNDLE_IDENTIFIER = hearme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -745,7 +747,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0.2;
-				PRODUCT_BUNDLE_IDENTIFIER = aimaker;
+				PRODUCT_BUNDLE_IDENTIFIER = hearme;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
