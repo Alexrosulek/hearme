@@ -18,23 +18,7 @@ class _KnowledgeBaseModalState extends State<KnowledgeBaseModal> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   List<Map<String, dynamic>> _knowledgeEntries = []; // List of entries
-  final List<String> _categories = [
-    'Music',
-    'Sports',
-    'Science',
-    'Technology',
-    'History',
-    'Art',
-    'Travel',
-    'Food',
-    'Literature',
-    'Movies',
-    'Gaming',
-    'Education',
-    'Health',
-    'Fitness',
-    // Add more categories as needed
-  ];
+  
   String? _selectedCategory;
 
   @override
@@ -233,8 +217,8 @@ Widget build(BuildContext context) {
         child: Image.asset(
           'assets/images/knowledicon.png',
         
-          width: 50, // Adjust size to fit within the CircleAvatar
-          height: 50 ,
+          width: 30, // Adjust size to fit within the CircleAvatar
+          height: 30 ,
         ),
   
   );
@@ -274,7 +258,7 @@ Widget build(BuildContext context) {
                       icon: const Icon(Icons.info_outline, size: 18),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "Provide a category (e.g., 'Music') and text describing the entry. Example: 'I like Taylor Swift, and Beyonce ... because'. *Knowledge entries let Buddy know persona context.*",
+                        "Seperate and detail your thoughts; The entry name does not matter; Buddy will find it all! Example: 'I like Taylor Swift, and Beyonce ... because ... '. *Used for Buddy mode; Knowledge entries let Buddy know persona context.*",
                       ),
                     ),
                   ],
@@ -282,38 +266,36 @@ Widget build(BuildContext context) {
                 const SizedBox(height: 16),
 
                 // Category Dropdown
-                DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedCategory = value;
-                      _textController.clear();
-                    });
-                  },
-                  items: _categories.map((category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                  decoration: InputDecoration(
-                    labelText: "Category",
-                    errorText: _errors['category'],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Category is required.";
-                    }
-                    return null;
-                  },
-                ),
+            TextFormField(
+  initialValue: _selectedCategory,
+  maxLength: 20,
+  decoration: InputDecoration(
+    labelText: "Name",
+    errorText: _errors['category'], // Keeping your error handling
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8.0),
+    ),
+    contentPadding: const EdgeInsets.symmetric(
+      horizontal: 12,
+      vertical: 4,
+    ),
+  ),
+  onChanged: (value) {
+    setState(() {
+      _selectedCategory = value.trim();
+    });
+  },
+  validator: (value) {
+    if (value == null || value.isEmpty) {
+      return "Name is required.";
+    }
+    if (value.length > 20) {
+      return "Name must be 20 characters or less.";
+    }
+    return null;
+  },
+),
+
                 const SizedBox(height: 16),
 
                 // TextFormField for "text"
@@ -322,7 +304,7 @@ Widget build(BuildContext context) {
                   maxLength: 500,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    labelText: "... is my favorite because ...",
+                    labelText: "... I like or dislike ... because ...",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
@@ -390,7 +372,7 @@ Widget build(BuildContext context) {
                       icon: const Icon(Icons.info_outline, size: 18),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "All existing knowledge entries; You can delete any by tapping the trash icon. *Knowledge entries let Buddy know persona context.*",
+                        "All existing knowledge; You can delete any by tapping the trash icon. *Knowledge entries let Buddy know persona context.*",
                       ),
                     ),
                   ],

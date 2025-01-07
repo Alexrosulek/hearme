@@ -456,12 +456,12 @@ isLaunchingBrowser = true; // Mark that we're launching a browser
                       children: [
                         ElevatedButton(
                           onPressed: _loginWithGoogle,
-                          child: const Text('Login/Register with Google'),
+                          child: const Text('Login or Register with Google'),
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
                           onPressed: _loginWithApple,
-                          child: const Text('Login/Register with Apple'),
+                          child: const Text('Login or Register with Apple'),
                         ),
                       ],
                     ),

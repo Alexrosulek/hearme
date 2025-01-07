@@ -1206,7 +1206,7 @@ Icon(
             onTap: () => _showInfoDialog(
               context,
               "Manual Vs. Buddy",
-              "Both transcribe & talk. One is speech by the user, the other autonomous speech and situational handling. Manual: Transcribe and type what you want said. Buddy: Transcribe and have Buddy autonomously handle the conversation. *Both follow the persona and voice in the settings*",
+              "Both transcribe & talk. Both transcribe but one is speech issued by the user, the other autonomous personalized speech and situational handling. Manual: Transcribe and type what you want said in realtime. Buddy: Transcribe and have Buddy autonomously handle the conversation in realtime. Both follow the speech settings. *See Who is 'Buddy'? for more.*",
             ),
             child: const Icon(
               Icons.info_outline,

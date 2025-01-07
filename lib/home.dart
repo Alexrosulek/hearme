@@ -7,6 +7,7 @@ import 'knowledge.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import 'profile.dart';
@@ -167,10 +168,8 @@ else{
   }
   }
 }
-
 class InfoTextBox extends StatelessWidget {
   const InfoTextBox({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -178,8 +177,12 @@ class InfoTextBox extends StatelessWidget {
       margin: const EdgeInsets.all(16.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.0),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -188,82 +191,46 @@ class InfoTextBox extends StatelessWidget {
           ),
         ],
       ),
-      child: const Scrollbar(
+      child: Scrollbar(
         thumbVisibility: true,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 12),
-              Text(
-                "We offer two primary services: transcription and speech; With a third special option, Buddy.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
+             
+              const SizedBox(height: 12),
+
+              // Transcription Section
+              _buildSection(
+                title: "1️⃣ Transcription",
+                description: [
+                  "- Offered for free to all users.",
+                  "- Accurately captures audio into text in real-time.",
+
+                ],
+                icon: Icons.mic,
               ),
-              SizedBox(height: 16),
-              Text(
-                "1️⃣ Transcription",
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+
+              // Speech Section
+              _buildSection(
+                title: "2️⃣ Speech",
+                description: [
+                  "- Speech can be issued in real-time as transcription occurs.",
+                  "- Customizable from tone, speech pace, loudness, accent, etc.",
+                ],
+                icon: Icons.volume_up,
               ),
-              SizedBox(height: 8),
-              Text(
-                "- Transcription is offered for free to all users.\n"
-                "- It captures spoken words and converts them into text in real-time.\n"
-                "- Seamless and accurate to ensure you don’t miss any details.",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                  height: 1.6,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "2️⃣ Speech",
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "- Speech can be issued in real-time as transcription occurs.\n"
-                "- The speech is personalizeable from a customizeable persona, tone, speech pace, etc.",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                  height: 1.6,
-                ),
-              ),
-              SizedBox(height: 16),
-              Text(
-                "3️⃣ Buddy",
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "- This mode can do all of the previous modes at once.\n"
-                "- Knowledge base you can enter to give Buddy persona context.\n"
-                "- Tell Buddy things on the fly.\n"
-                "- Buddy can ask you a question during conversation if it needs help.\n"
-                "- Change Buddy's personality, tone, speech pace, etc.\n"
-                "- Enter a goal and let Buddy loose to conversate for you.",
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                  height: 1.6,
-                ),
+
+              // Buddy Section
+              _buildSection(
+                title: "3️⃣ Buddy",
+                description: [
+                  "- This mode can do all of the previous modes at once.",
+                  "- Give Buddy your goal and we'll will handle the rest.",
+                  
+                 
+                ],
+                icon: Icons.person,
               ),
             ],
           ),
@@ -271,7 +238,50 @@ class InfoTextBox extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildSection({
+    required String title,
+    required List<String> description,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: const Color(0xFF0D47A1), size: 20),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0D47A1),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          for (String line in description)
+            Padding(
+              padding: const EdgeInsets.only(left: 28.0, bottom: 6.0),
+              child: Text(
+                line,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
+
 
 class OnboardingFlow extends StatefulWidget {
   final VoidCallback onComplete;
@@ -290,7 +300,7 @@ class OnboardingFlow extends StatefulWidget {
 class _OnboardingFlowState extends State<OnboardingFlow>
     with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController();
-  int _currentIndex = 0;
+  
 
   late AnimationController _animationController;
 
@@ -313,14 +323,11 @@ class _OnboardingFlowState extends State<OnboardingFlow>
     super.dispose();
   }
 
-  List<Widget> get _pages {
-    return [
-      
-          _page1(),
-      _finalPage(),
-    ];
-  }
-  
+
+
+
+
+
 Widget _finalPage() {
   return Container(
     decoration: _buildBackgroundGradient(Colors.blueAccent),
@@ -328,43 +335,16 @@ Widget _finalPage() {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          // Header section
-          Expanded(
-            flex: 2,
-            child: Container(
-              alignment: Alignment.center,
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: 16),
-                   Text(
-                    'Here is the rundown.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white70,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+           const SizedBox(height: 10),
 
-          // InfoTextBox section
-          const Expanded(
-            flex: 3,
+          const WelcomePage(),
+       const Expanded(
+            flex: 4,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: InfoTextBox(),
             ),
           ),
-
-          // Comparison Chart section
-          Expanded(
-            flex: 3,
-            child: _buildComparisonChart(),
-          ),
-
           // Button section
           Expanded(
             flex: 1,
@@ -391,324 +371,6 @@ Widget _finalPage() {
   );
 }
 
-Widget _page1() {
-  
- 
-
-  
-
-  return Container(
-    decoration: _buildBackgroundGradient(Colors.blueAccent),
-    child: SafeArea(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          // Header Section
-          Expanded(
-            flex: 2,
-            child: Container(
-              alignment: Alignment.center,
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.waving_hand, size: 80, color: Colors.white),
-                  SizedBox(height: 24),
-                  Text(
-                    'Glad you could make it, Watch us in action!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18, color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // GIF Section
-          Expanded(
-            flex: 3,
-            child: Image.asset(
-              'assets/video.gif',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Next Button
-          _nextButton(),
-        ],
-      ),
-    ),
-  );
-}
-
-Widget _buildComparisonChart() {
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-    padding: const EdgeInsets.all(8),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow:const [
-        BoxShadow(
-          color: Colors.black12,
-          blurRadius: 10,
-          offset: Offset(0, 6),
-        ),
-      ],
-    ),
-    child: SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-        
-          const SizedBox(height: 10),
-          Table(
-            border: const TableBorder(
-              horizontalInside: BorderSide(color: Colors.black12, width: 1),
-            ),
-            columnWidths: const {
-              0: FlexColumnWidth(2),
-              1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
-              3: FlexColumnWidth(1),
-            },
-            children: [
-              _buildHeaderRow(['Mode','Transcribe', 'Speech', 'Autonomous', ]),
-              _buildFeatureRowWithInfo('Transcribe',  true, false, false, 'Transcribe speech to text.'),
-              _buildFeatureRowWithInfo('Manual',true,   true, false,  'Transcribe speech to text and type what you want to say, your "Buddy" persona will speak it.'),
-              _buildFeatureRowWithInfo('Buddy', true, true, true, 'Transcribe speech to text and an AI agent, Buddy, will handle the conversating automatically. Buddy can ask you questions with popups and will use its objective to talk to the conversee and help you.'),
-
-            ],
-          ),
-          
-          
-         
-          const SizedBox(height: 10),
-          Table(
-            border: const TableBorder(
-              horizontalInside: BorderSide(color: Colors.black12, width: 1),
-            ),
-            columnWidths: const {
-              0: FlexColumnWidth(2),
-              1: FlexColumnWidth(1),
-              2: FlexColumnWidth(1),
-              3: FlexColumnWidth(1),
-              4: FlexColumnWidth(1),
-              5: FlexColumnWidth(1),
-            },
-            children: [
-              _buildHeaderRow(['Feature', 'Free', 'Bronze', 'Silver', 'Gold', 'Diamond']),
-                            _buildFeatureRowWithInfo2('All Modes', true,  true, true, true, true,'All modes are available to everyone and cost credits. "Free" users are only refreshed transcribe credits.'),
-                               _buildFeatureRowWithInfo2('Realtime', true,  true, true, true, true,'All modes process faster than required enableding realtime conversations and listening.'),
-       
-              _buildSubscriptionRowWithInfo('Queue Priority', '5', '4', '3', '2', '1', 'If there is a line for a room, you will be queued first over higher numbered users.'),
-              _buildSubscriptionRowWithInfo('Daily Credits', '200', '500', '1250', '3000', '5000', 'Daily refresh of the users credits. "Free" users are only refreshed transcribe credits.'),
-
-         
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-TableRow _buildHeaderRow(List<String> headers) {
-  return TableRow(
-    children: headers.map((header) {
-      return Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              header,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 8,
-                color: Colors.black87,
-              ),
-            ),
-          
-          ],
-        ),
-      );
-    }).toList(),
-  );
-}
-
-TableRow _buildFeatureRowWithInfo2(String mode, bool realtime, bool speechToText, bool manual, bool aiAssist,bool aiAssist2, String info) {
-  return TableRow(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(1.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                mode,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.black87,
-                ),
-                
-              ),
-            ),
-            IconButton(
-          
-              icon: const Icon(Icons.info_outline, size: 10, color: Colors.black),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-             
-                    content: Text(info),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child:const Text('Close'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-       _buildIconCell(realtime),
-      _buildIconCell(speechToText),
-      _buildIconCell(manual),
-      _buildIconCell(aiAssist),
-        _buildIconCell(aiAssist2),
-    ],
-  );
-}
-TableRow _buildFeatureRowWithInfo(String mode, bool speechToText, bool manual, bool aiAssist, String info) {
-  return TableRow(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(1.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                mode,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.black87,
-                ),
-                
-              ),
-            ),
-            IconButton(
-          
-              icon: const Icon(Icons.info_outline, size: 10, color: Colors.black),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    
-                    content: Text(info),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Close'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-     
-      _buildIconCell(speechToText),
-      _buildIconCell(manual),
-      _buildIconCell(aiAssist),
-    ],
-  );
-}
-
-TableRow _buildSubscriptionRowWithInfo(String mode, String free, String bronze, String silver, String gold, String diamond, String info) {
-  return TableRow(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(0.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                mode,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.black87,
-                ),
-              
-              ),
-            ),
-            IconButton(
-           
-              padding: EdgeInsets.zero,
-              icon: const Icon(Icons.info_outline, size: 10, color: Colors.black),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                   
-                    content: Text(info),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Close'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      _buildCell(free),
-      _buildCell(bronze),
-      _buildCell(silver),
-      _buildCell(gold),
-      _buildCell(diamond),
-    ],
-  );
-}
-
-Widget _buildIconCell(bool available) {
-  return Padding(
-    padding: const EdgeInsets.only(top: 18.8), // Adjust the top padding to move the icon down
-    child: Center(
-      child: Icon(
-        available ? Icons.check_circle : Icons.cancel,
-        color: available ? Colors.green : Colors.red,
-        size: 11,
-      ),
-    ),
-  );
-}
-
-Widget _buildCell(String text) {
-  return Padding(
-    padding: const EdgeInsets.only(top: 16.5), // Adjust the top padding to move the text down
-    child: Center(
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          color: Colors.black87,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    ),
-  );
-}
-
 
 
   BoxDecoration _buildBackgroundGradient(Color color) {
@@ -721,50 +383,17 @@ Widget _buildCell(String text) {
     );
   }
 
-  Widget _nextButton() {
-    return ElevatedButton(
-      onPressed: _nextPage,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blueAccent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-      ),
-      child: const Text('Next'),
-    );
-  }
-
-  void _nextPage() {
-    if (_currentIndex < _pages.length - 1) {
-      setState(() {
-        _animationController.reset();
-        _animationController.forward();
-      });
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          PageView(
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() => _currentIndex = index);
-              _animationController.reset();
-              _animationController.forward();
-            },
-            children: _pages,
-          ),
+      body: 
+       
+              _finalPage(),
+          
          
-        ],
-      ),
+        
+     
     );
   }
     }
@@ -855,11 +484,16 @@ Widget _buildImageGrid(BuildContext context, String jwtToken) {
 
           child:
           KnowledgeBaseModal(jwtToken: jwtToken)    ),},
-               {'type': 'widget', 'widget': 
+         
+   {'type': 'combined', 'widget':  const WhoIsBuddyWidget(), } ,
+   
+   
+   
+   {'type': 'combined', 'widget':  const WhoIsBuddy2Widget(), },
+         {'type': 'widget', 'widget': 
  BuyCreditsWidget(
      jwtToken:jwtToken)
-        },   
-   {'type': 'combined', 'widget':  const WhoIsBuddyWidget(), } ,{'type': 'combined', 'widget':  const WhoIsBuddy2Widget(), }
+        }
 
   ];
 
@@ -1345,7 +979,7 @@ class Celebration2Dialog extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text('Dismiss'),
+                  child: const Text('Okay'),
                 ),
               ],
             ),
@@ -1397,12 +1031,12 @@ class BuyCreditsWidget extends StatefulWidget {
 class BuyCreditsWidgetState extends State<BuyCreditsWidget> {
   bool _isLoading = false;
   StreamSubscription<List<PurchaseDetails>>? _subscription;
-Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
 
   @override
   void initState() {
     super.initState();
-    _initializeInAppPurchaseListener(widget.jwtToken, context);
+    _initializeInAppPurchaseListener();
+    
   }
 
   @override
@@ -1445,7 +1079,7 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
                 Icon(
                   Icons.star,
                   color: Colors.brown,
-                  size: 24,
+                  size: 30,
                 ),
                  SizedBox(width: 8),
                Text(
@@ -1464,8 +1098,9 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
               ],
             ),
             onTap: () {
+            
+              _buyCredits('bronze1');
               Navigator.pop(context);
-              _buyCredits('bronze1', context);
             },
           ),
 
@@ -1477,7 +1112,7 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
                 Icon(
                   Icons.star,
                   color: Colors.grey,
-                  size: 24,
+                  size: 30,
                 ),
                  SizedBox(width: 8),
                  Text(
@@ -1496,8 +1131,9 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
               ],
             ),
             onTap: () {
+              
+              _buyCredits('silver1');
               Navigator.pop(context);
-              _buyCredits('silver1', context);
             },
           ),
 
@@ -1509,7 +1145,7 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
                 Icon(
                   Icons.star,
                   color: Colors.amber,
-                  size: 24,
+                  size: 30,
                 ),
                  SizedBox(width: 8),
                  Text(
@@ -1528,8 +1164,9 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
               ],
             ),
             onTap: () {
+             
+              _buyCredits('gold1');
               Navigator.pop(context);
-              _buyCredits('gold1', context);
             },
           ),
 
@@ -1541,7 +1178,7 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
                 Icon(
                   Icons.star,
                   color: Colors.blueAccent,
-                  size: 24,
+                  size: 30,
                 ),
                SizedBox(width: 8),
                  Text(
@@ -1560,8 +1197,9 @@ Set<String> productIds = {'monthly_subscription', 'annual_subscription'};
               ],
             ),
             onTap: () {
+             
+              _buyCredits('dimaond1' );
               Navigator.pop(context);
-              _buyCredits('diamond1', context);
             },
           ),
         ],
@@ -1607,8 +1245,9 @@ void _showCreditOptions(BuildContext context) {
               ],
             ),
             onTap: () {
+            
+              _buyCredits('1credit');
               Navigator.pop(context);
-              _buyCredits('1credit', context);
             },
           ),
           
@@ -1618,33 +1257,12 @@ void _showCreditOptions(BuildContext context) {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(width: 8),
-                Stack(
-                  children: [
-                    Image.asset(
+                   Image.asset(
                       'assets/images/credits.png',
                       width: 60,
                       height: 60,
                     ),
-                    Positioned(
-                      top: 1,
-                      right: 1,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          'More credits+',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 7,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                
                 const SizedBox(width: 12),
                 const Text(
                   '1500 credits',
@@ -1662,8 +1280,9 @@ void _showCreditOptions(BuildContext context) {
               ],
             ),
             onTap: () {
+            
+              _buyCredits('2credit');
               Navigator.pop(context);
-              _buyCredits('2credit', context);
             },
           ),
 
@@ -1673,33 +1292,14 @@ void _showCreditOptions(BuildContext context) {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(width: 8),
-                Stack(
-                  children: [
+                
+                  
                     Image.asset(
                       'assets/images/credits.png',
                       width: 60,
                       height: 60,
                     ),
-                    Positioned(
-                      top: 1,
-                      right: 1,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          'Most Credits+',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 7,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                   
                 const SizedBox(width: 12),
                 const Text(
                   '3500 credits',
@@ -1717,8 +1317,9 @@ void _showCreditOptions(BuildContext context) {
               ],
             ),
             onTap: () {
+              
+              _buyCredits('3credit');
               Navigator.pop(context);
-              _buyCredits('3credit', context);
             },
           ),
         ],
@@ -1728,22 +1329,50 @@ void _showCreditOptions(BuildContext context) {
 }
 
 
-void _initializeInAppPurchaseListener(String token, BuildContext context) {
+void _initializeInAppPurchaseListener() {
   _subscription = InAppPurchase.instance.purchaseStream.listen(
     (List<PurchaseDetails> purchaseDetailsList) {
-      if (mounted) {
-        _listenToPurchaseUpdated(purchaseDetailsList, token, context);
-      }
+
+      _listenToPurchaseUpdated(purchaseDetailsList);
     },
-    onDone: () {
-      _subscription?.cancel();
-    },
+    onDone: () => _subscription?.cancel(),
     onError: (error) {
-      if (mounted) {
-        _showSnackBar(context, 'Purchase error: $error');
-      }
+        if (mounted) {
+      _showSnackBar(context, 'Purchase error: $error');
+        }
     },
   );
+}
+void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList) {
+  for (var purchaseDetails in purchaseDetailsList) {
+    switch (purchaseDetails.status) {
+      case PurchaseStatus.pending:
+        // Show a loading or pending message to the user
+        _showSnackBar(context, 'Purchase is pending. Please wait...');
+        break;
+        
+      case PurchaseStatus.purchased:
+        _handlePurchaseSuccess(purchaseDetails);
+        break;
+        
+      case PurchaseStatus.error:
+        if (mounted) {
+          _showDisputeSnackBar3(context);
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      case PurchaseStatus.canceled:
+        if (mounted) {
+          _showSnackBar(context, 'Purchase was canceled.');
+        }
+        InAppPurchase.instance.completePurchase(purchaseDetails); // Clear canceled purchase
+        break;
+        
+      default:
+        break;
+    }
+  }
 }
 
 void _showSnackBar(BuildContext context, String message) {
@@ -1753,35 +1382,6 @@ void _showSnackBar(BuildContext context, String message) {
     );
   }
 }
-void _listenToPurchaseUpdated(List<PurchaseDetails> purchaseDetailsList, String token, BuildContext context) {
-  for (var purchaseDetails in purchaseDetailsList) {
-    switch (purchaseDetails.status) {
-      case PurchaseStatus.pending:
-        _showSnackBar(context, 'Subscription is pending. Please wait...');
-        break;
-
-      case PurchaseStatus.purchased:
-       
-          _handlePurchaseSuccess(purchaseDetails, token, context);
-        
-        break;
-
-      case PurchaseStatus.error:
-        _showDisputeSnackBar3(context);
-        InAppPurchase.instance.completePurchase(purchaseDetails);
-        break;
-
-      case PurchaseStatus.canceled:
-        _showSnackBar(context, 'Subscription was canceled.');
-        InAppPurchase.instance.completePurchase(purchaseDetails);
-        break;
-
-      default:
-        break;
-    }
-  }
-}
-
 
 
 
@@ -1815,18 +1415,16 @@ void _showDisputeSnackBar3(BuildContext context) {
 }
 
   // Show "Common Problems" banner with a timer for automatic dismissal
-   
-}
-void _handlePurchaseSuccess(PurchaseDetails purchaseDetails, String token,BuildContext context) async {
+   }
+void _handlePurchaseSuccess(PurchaseDetails purchaseDetails) async {
   if (purchaseDetails.verificationData.serverVerificationData.isNotEmpty) {
     final receipt = purchaseDetails.verificationData.serverVerificationData;
 
     // Send receipt to the backend for validation
-    final success = await _sendReceiptToBackend(receipt, token);
+    final success = await _sendReceiptToBackend(receipt );
 
     if (success) {
       if (mounted) {
-        
         _showCelebrationWidget(context); // Show celebration widget
       }
     } else {
@@ -1842,7 +1440,6 @@ void _handlePurchaseSuccess(PurchaseDetails purchaseDetails, String token,BuildC
 
   InAppPurchase.instance.completePurchase(purchaseDetails); // Mark purchase complete
 }
-
 bool _isCelebrationActive = false;
 
 void _showCelebrationWidget(BuildContext context) {
@@ -1863,8 +1460,12 @@ void _showCelebrationWidget(BuildContext context) {
   );
 }
 
-Future<bool> _sendReceiptToBackend(String receipt, String token) async {
-   // Retrieve user’s authentication token
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('jwt_token');
+  }
+Future<bool> _sendReceiptToBackend(String receipt) async {
+  final token = await getToken(); // Retrieve user’s authentication token
 
   final response = await http.post(
     Uri.parse('https://www.hearme.services/validate_receipt/'),
@@ -1882,14 +1483,13 @@ Future<bool> _sendReceiptToBackend(String receipt, String token) async {
     // Purchase validation succeeded
     return true;
   } else {
-    // Purchase validation failed, log error details if necessary
-   
+
     return false;
   }
 }
 
-
-  void _buyCredits(String productId,BuildContext context) async {
+  void _buyCredits(String productId) async {
+  await InAppPurchase.instance.restorePurchases();
 
   final bool available = await InAppPurchase.instance.isAvailable();
   if (!available) {
@@ -1899,9 +1499,10 @@ Future<bool> _sendReceiptToBackend(String receipt, String token) async {
      }
     return;
   }
+
   // Define product identifiers
 
-  const Set<String> productIds = {'credit1', 'credit2', 'credit3','Bronze', 'Silver', 'Gold', 'Diamond'};
+  const Set<String> productIds = {'1credit', '2credit', '3credit','bronze1', 'silver1', 'gold1', 'dimaond1'};
   final ProductDetailsResponse response = await InAppPurchase.instance.queryProductDetails(productIds);
 
   if (response.notFoundIDs.isNotEmpty) {
@@ -1925,7 +1526,7 @@ Widget build(BuildContext context) {
     curve: Curves.easeInOut,
     decoration: BoxDecoration(
       gradient: const LinearGradient(
-        colors: [Colors.orangeAccent, Color.fromARGB(255, 151, 64, 251)],
+        colors: [Colors.orangeAccent, Colors.blueAccent],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -1969,7 +1570,7 @@ Widget build(BuildContext context) {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shadowColor: Colors.black45,
                 elevation: 5,
               ),
@@ -1987,8 +1588,7 @@ Widget build(BuildContext context) {
                      mainAxisSize: MainAxisSize.min,
                       children:  [
                         
-                        Icon(Icons.credit_card, size: 18, color: Colors.black),
-                        SizedBox(width: 5),
+                        
                         Text(
                           "Credits",
                           style: TextStyle(
@@ -2000,16 +1600,16 @@ Widget build(BuildContext context) {
                     ),
             ),
             Positioned(
-              left: 96.8,
+              left: 77,
               child: GestureDetector(
                 onTap: () => _showInfoDialog(
                   context,
                   "",
-                  "Tap the button for a one time credit refill. Credits purchased here can be used for translate & talk. *This is not a subscription and is one time purchase of credits*",
+                  "Tap the button for a one time credit refill. Credits purchased here can be used for any purpose.",
                 ),
                 child: const Icon(
                   Icons.info_outline,
-                  size: 13,
+                  size: 11,
                   color: Colors.black,
                 ),
               ),
@@ -2029,7 +1629,7 @@ Widget build(BuildContext context) {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
                 shadowColor: Colors.black45,
                 elevation: 5,
               ),
@@ -2059,16 +1659,16 @@ Widget build(BuildContext context) {
                     ),
             ),
             Positioned(
-              left: 117,
+              left: 120,
               child: GestureDetector(
                 onTap: () => _showInfoDialog(
                   context,
                   "",
-                  "Click for a subscription; It will last one month from purchase, non-recurring, purchase again once gone if needed. You will receive an increase in daily credit refill amount, priority queueing, and make your credit refill grant talk type credits. Use the chart at the bottom of the page.",
+                  "Click for a one month subscription. You will receive an increase in daily credit refill amount, priority queue, and make your refills all premium credits. Use the 'How it works' widget. *Lasts one month from purchase; Purchase again if needed.*",
                 ),
                 child: const Icon(
                   Icons.info_outline,
-                  size: 13,
+                  size: 11,
                   color: Colors.black,
                 ),
               ),
@@ -2199,10 +1799,11 @@ class WhoIsBuddyWidget extends StatelessWidget {
         return AlertDialog(
           title: const Text(
             "What can buddy do?",
-            style: TextStyle(fontWeight: FontWeight.bold),
+            
+                textAlign: TextAlign.center,
           ),
           content: const Text(
-            "Buddy can change how you interact. Buddy will listen and speak for you. We'll give Buddy an objective and a persona; Try giving Buddy your own identity as its persona. Then Buddy can automatically converse with the conversees around. *Buddy will find information by choosing to ask you a question, searching your knowledge base, and more.",
+            "Buddy can help you interact. Buddy will listen and speak for you while checking in with you first. We'll give Buddy an objective and a persona; Try giving Buddy your own identity as its persona. Then Buddy can automatically converse with the conversees around. *Buddy can choose to ask you a question, search your knowledge base, ask you the objective, and more.",
             textAlign: TextAlign.justify,
           ),
           actions: [
@@ -2227,74 +1828,142 @@ class WhoIsBuddy2Widget extends StatefulWidget {
 }
 
 class _WhoIsBuddy2WidgetState extends State<WhoIsBuddy2Widget> {
-  Widget _buildComparisonChart(BoxConstraints constraints) {
-    double availableWidth = constraints.maxWidth;
+Widget _buildComparisonChart(BoxConstraints constraints) {
+  double availableWidth = constraints.maxWidth;
 
-    // Scaling factors
-    double fontSize = availableWidth * 0.038; // Scaled font size
-    double iconSize = availableWidth * 0.07; // Scaled icon size
-    double cellPadding = 1; // Scaled padding for cells
+  // Scaling factors
+  double fontSize = availableWidth * 0.044; // Scaled font size
+  double iconSize = availableWidth * 0.0705; // Scaled icon size
+  double cellPadding = 8; // Scaled padding for cells
 
-    return SingleChildScrollView(
-      child: Container(
-     margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        padding: EdgeInsets.all(cellPadding),
-        
-        decoration: const BoxDecoration(
-          color: Colors.white,
-         
-          boxShadow:  [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, 6),
-            ),
-          ],
+  return SingleChildScrollView(
+    child: Container(
+      width: double.infinity, // Make the chart take full width
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+      padding: EdgeInsets.all(cellPadding),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12), // Rounded corners
+        border: Border.all(
+          color: Colors.grey.shade300, // Subtle border color
+          width: 1.5,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-               const Text(
-          "How it works.",
-          style: TextStyle(
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 1),
+          const Text(
+            "How it works.",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Features",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          // Vertical Table 1
+          _buildVerticalTable(
+            '',
+            ['', 'Hear', 'Talk', 'Handle'],
+            [
+              _buildFeatureRow('Transcribe', [true, false, false], fontSize, iconSize),
+              _buildFeatureRow('Manual', [true, true, false], fontSize, iconSize),
+              _buildFeatureRow('Buddy', [true, true, true], fontSize, iconSize),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "Subscriptions",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          // Vertical Table 2
+          _buildVerticalTable2(
+            '',
+            ['', 'Free', 'Bronze', 'Silver', 'Gold', 'Diamond'],
+            [
+              _buildFeatureRow('All Modes', [true, true, true, true, true], fontSize, iconSize),
+              _buildFeatureRow('Real Time', [true, true, true, true, true], fontSize, iconSize),
+              _buildSubscriptionRow('Daily Credits', ['200', '500', '1250', '3k', '5K'], fontSize),
+           
+              _buildSubscriptionRow('Queue Priority', ['5', '4', '3', '2', '1'], fontSize),
+              ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+Widget _buildVerticalTable2(String title, List<String> headers, List<Widget> rows) {
+  // Colors for the subscription tiers (matching the headers)
+  final iconColors = [
+    Colors.transparent, // No star for the first empty header
+    Colors.grey,        // Free
+    Colors.brown,       // Bronze
+    Colors.grey,        // Silver
+    Colors.amber,       // Gold
+    Colors.blueAccent,  // Diamond
+  ];
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (title.isNotEmpty) ...[
+        Text(
+          title,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
-            fontSize: 15,
+            fontSize: 13,
             color: Colors.black,
           ),
           textAlign: TextAlign.center,
         ),
-   const SizedBox(height: 20),
-            // Vertical Table 1
-            _buildVerticalTable(
-              '',
-              ['', 'Transcribe', 'Speech', 'Autonomous'],
-              [
-                _buildFeatureRow('Transcribe', [true, false, false], fontSize, iconSize),
-                _buildFeatureRow('Manual', [ true, true, false], fontSize, iconSize),
-                _buildFeatureRow('Buddy', [true, true, true], fontSize, iconSize),
-              ],
-            ),
-   const SizedBox(height: 16),
-            SizedBox(height: cellPadding),
-
-            // Vertical Table 2
-            _buildVerticalTable(
-              '',
-              ['','Free', 'Bronze', 'Silver', 'Gold', 'Diamond'],
-              [
-                    _buildFeatureRow('All Modes', [true, true, true, true, true], fontSize, iconSize),
-                        _buildFeatureRow('Real Time', [true, true, true, true, true], fontSize, iconSize),
-                   
-                _buildSubscriptionRow('Queue Priority', ['5', '4', '3', '2', '1'], fontSize),
-                _buildSubscriptionRow('Daily Credits', ['200', '500', '1250', '3k', '5K'], fontSize),
-                
-              ],
-            ),
-          ],
-        ),
+      ],
+      const Divider(color: Colors.black12, thickness: 1),
+      // Header Row with Icons
+      Row(
+        children: headers.asMap().entries.map((entry) {
+          int index = entry.key;
+          return Expanded(
+            child: index == 0
+                ? const SizedBox() // Leave the first header empty
+                : Icon(
+                    Icons.star,
+                    color: iconColors[index],
+                    size: 18,
+                  ),
+          );
+        }).toList(),
       ),
-    );
-  }
+      const Divider(color: Colors.black12, thickness: 1),
+      // Rows
+      ...rows,
+    ],
+  );
+}
+
 
 Widget _buildVerticalTable(String title, List<String> headers, List<Widget> rows) {
   return Column(
@@ -2341,9 +2010,9 @@ Widget _buildVerticalTable(String title, List<String> headers, List<Widget> rows
           return Expanded(
             child: Text(
               header,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: index == 0 ? 7 : 6.5, // Conditional font size
+                fontSize: 8, // Conditional font size
                 color: Colors.black87,
               ),
               textAlign: TextAlign.center,
@@ -2693,6 +2362,96 @@ class LanguageWidgetState extends State<LanguageWidget> {
                 ),
               )
               .toList(),
+        ),
+      ],
+    );
+  }
+}
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Container(
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFE3F2FD), Color(0xFFBBDEFB)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Welcome Text
+              const SizedBox(height: 8),
+            const Text(
+              "Credits Added!",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Features: Hear | Talk | Handle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildFeatureIcon(Icons.hearing, "Hear"),
+                const SizedBox(width: 16),
+                _buildFeatureIcon(Icons.mic, "Talk"),
+                const SizedBox(width: 16),
+                _buildFeatureIcon(Icons.handshake, "Handle"),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Description
+            const Text(
+              "Here to help bridge communication.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Feature Icon Builder
+  Widget _buildFeatureIcon(IconData icon, String label) {
+    return Column(
+      children: [
+        Icon(
+          icon,
+          size: 36,
+          color: Colors.blueAccent,
+        ),
+        const SizedBox(height: 6),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0D47A1),
+          ),
         ),
       ],
     );

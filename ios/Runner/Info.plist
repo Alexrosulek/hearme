@@ -11,13 +11,11 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>hearme</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>hearme</string>
-	<key>UIRequiresFullScreen</key>
-	<true/>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -41,14 +39,26 @@
 	<false/>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>This app does not access Apple Music data.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>This app does not use Face ID or facial recognition data.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need access to the microphone for audio recording for use with our services, we do not store or keep this information.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app does not access motion data.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to save images.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We use speech recognition to help you transcribe conversations in real-time for use with our services, we do not store or keep this information.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen.storyboard</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 	<key>UIStatusBarStyle</key>
 	<string></string>
 	<key>UISupportedInterfaceOrientations</key>
@@ -64,15 +74,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSFaceIDUsageDescription</key>
-	<string>This app does not use Face ID or facial recognition data.</string>
-	<key>NSAppleMusicUsageDescription</key>
-	<string>This app does not access Apple Music data.</string>
-	<key>NSMotionUsageDescription</key>
-	<string>This app does not access motion data.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>We use speech recognition to help you transcribe conversations in real-time for use with our services, we do not store or keep this information.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>We need access to the microphone for audio recording for use with our services, we do not store or keep this information.</string>
 </dict>
 </plist>

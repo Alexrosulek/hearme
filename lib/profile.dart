@@ -44,17 +44,53 @@ class _ProfileModalState extends State<ProfileModal> {
     'Sage',
     'Verse',
   ];
-  final List<String> _accents = [
-    'Neutral',
-    'American',
-    'British',
-    'Australian',
-    'Indian',
-    'Irish',
-    'Canadian',
-    'South African',
-    'New Zealander',
-  ];
+final List<String> _accents = [
+  'Neutral',
+  'American',
+  'British',
+ 
+  'Indian',
+  'Irish',
+  'Canadian',
+  'South African',
+  'New Zealander',
+  'Scottish',
+
+  'Texan',
+  'New Yorker',
+ 
+  'Jamaican',
+  'Nigerian',
+ 
+  'Egyptian',
+  'Brazilian',
+  'Mexican',
+  'Spanish',
+  
+  'Portuguese',
+  'French',
+  
+  'German',
+  'Italian',
+  'Dutch',
+  'Norwegian',
+  'Swedish',
+  'Danish',
+  'Russian',
+  'Turkish',
+  'Arabic',
+ 
+  'Thai',
+  'Vietnamese',
+  'Filipino',
+  'Indonesian',
+  'Chinese',
+
+  'Japanese',
+  'Korean',
+
+];
+
   final List<String> _fastnessOptions = [
     'Very Slow',
     'Slow',
@@ -75,7 +111,9 @@ class _ProfileModalState extends State<ProfileModal> {
     'Serious',
     'Playful',
     'Excited',
-    'Authoritative',
+    'Happy',
+    'Bored',
+    'Mad',
     'Charming',
     'Sarcastic',
   ];
@@ -108,8 +146,8 @@ class _ProfileModalState extends State<ProfileModal> {
           _age = (data['age'] is num && data['age'] >= 1 && data['age'] <= 100)
               ? data['age'].toDouble()
               : 25;
+          _nameController.text = (data['new_name'] ?? '').isEmpty ? '' : data['new_name'];
 
-          _nameController.text = data['new_name'] ?? '';
           _specialAdditionController.text = data['specialaddition'] ?? '';
           _selectedGender = _genders.contains(data['gender'])
               ? data['gender']
@@ -331,13 +369,13 @@ class _ProfileModalState extends State<ProfileModal> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     const Text(
-                      "Talking Persona",
+                      "Speech Persona",
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
                       icon: const Icon(Icons.info_outline, size: 18),
                       onPressed: () => _showInfo(
-                        "Configure the voice and persona used for talking. For use in 'Manual' and 'Buddy'.",
+                        "Configure the voice and persona used for speech/persona. For use in 'Manual' and 'Buddy'.",
 
                         
                       ),
@@ -352,7 +390,7 @@ class _ProfileModalState extends State<ProfileModal> {
                   controller: _nameController,
                   labelText: "Name",
                   maxLength: 30,
-                  infoText: "Enter a name for Buddy with 3-30 characters. E.g., 'Your name'.",
+                  infoText: "Enter a name for Buddy with 3-30 characters. E.g., 'Your name'. *Not used in manual mode*",
                   validator: (value) {
                     final text = value?.trim() ?? '';
                     if (text.isEmpty) {
@@ -376,7 +414,7 @@ class _ProfileModalState extends State<ProfileModal> {
                   labelText: "Personality",
                   maxLength: 100,
                   infoText:
-                      "How Buddy will engage; e.g. 'Try to make jokes...' or 'You love sports...'",
+                      "How Buddy will engage; e.g. 'Try to make jokes...' or 'You love sports...' *Not used in manual mode*",
                   validator: (value) {
                     // Personality can be optional, so no minimum length check
                     // But let's do an example: max 100 chars
@@ -404,7 +442,7 @@ class _ProfileModalState extends State<ProfileModal> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "Choose an age for Buddy.",
+                        "Choose an age for Buddy. *Not used in manual mode*",
                       ),
                     ),
                   ),
@@ -432,7 +470,7 @@ class _ProfileModalState extends State<ProfileModal> {
                 // Gender Dropdown
                 _buildValidatedDropdown(
                   label: "Gender",
-                  infoMessage: "Set Buddy's pronoun.",
+                  infoMessage: "Set Buddy's pronoun. *Not used in manual mode*",
                   items: _genders,
                   value: _selectedGender,
                   onChanged: (value) => setState(() => _selectedGender = value),
@@ -448,7 +486,7 @@ class _ProfileModalState extends State<ProfileModal> {
                 // Voice Dropdown
                 _buildValidatedDropdown(
                   label: "Voice",
-                  infoMessage: "Select a voice style for talking voice/Buddy.",
+                  infoMessage: "Select a voice style for speech.",
                   items: _voices,
                   value: _selectedVoice,
                   onChanged: (value) => setState(() => _selectedVoice = value),
@@ -480,7 +518,7 @@ class _ProfileModalState extends State<ProfileModal> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "Regional accent for talking voice/Buddy.",
+                        "Regional accent for speech.",
                       ),
                     ),
                   ),
@@ -509,7 +547,7 @@ class _ProfileModalState extends State<ProfileModal> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "How fast talking voice/Buddy will talk.",
+                        "How fast speech will talk.",
                       ),
                     ),
                   ),
@@ -538,7 +576,7 @@ class _ProfileModalState extends State<ProfileModal> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "Volume level for talking voice/Buddy.",
+                        "Volume level for speech.",
                       ),
                     ),
                   ),
@@ -565,7 +603,7 @@ class _ProfileModalState extends State<ProfileModal> {
                       icon: const Icon(Icons.info_outline, size: 16),
                       splashRadius: 16,
                       onPressed: () => _showInfo(
-                        "The emotional tone the talking voice/Buddy will use",
+                        "The emotional tone speech will use.",
                       ),
                     ),
                   ),
@@ -635,8 +673,8 @@ Widget build(BuildContext context) {
         child: Image.asset(
           'assets/images/profileicon.png',
          
-          width: 50, // Adjust size to fit within the CircleAvatar
-          height: 50,
+          width: 30, // Adjust size to fit within the CircleAvatar
+          height: 30,
         ),
  
   );
