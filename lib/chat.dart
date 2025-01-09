@@ -836,7 +836,7 @@ void _toggleStickyButton() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Error"),
+       
         content: Text(message),
         actions: [TextButton(onPressed: Navigator.of(context).pop, child: const Text("Okay"))],
       ),

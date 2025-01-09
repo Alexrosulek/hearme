@@ -645,6 +645,22 @@ final List<String> _accents = [
     );
   }
 
+void _showInfoDialog(BuildContext context, String title, String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Okay"),
+        ),
+      ],
+    ),
+  );
+}
+
   ///
   /// The main entry point for this widget. Tapping the avatar
   /// opens a bottom sheet with the profile form.
@@ -652,7 +668,13 @@ final List<String> _accents = [
 Widget build(BuildContext context) {
   return GestureDetector(
     onTap: () {
-      _isSaved = false;
+      if (widget.jwtToken.trim().isEmpty) {
+        // Show login-required dialog if jwtToken is empty
+        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+        return;
+      }
+
+    
       _backupInitialValues();
 
       showModalBottomSheet(
@@ -669,14 +691,11 @@ Widget build(BuildContext context) {
         }
       });
     },
-    
-        child: Image.asset(
-          'assets/images/profileicon.png',
-         
-          width: 30, // Adjust size to fit within the CircleAvatar
-          height: 30,
-        ),
- 
+    child: Image.asset(
+      'assets/images/profileicon.png',
+      width: 30,
+      height: 30,
+    ),
   );
 }
 }

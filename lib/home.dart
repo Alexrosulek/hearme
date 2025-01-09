@@ -217,6 +217,7 @@ else{
   }
   }
 }
+
 class InfoTextBox extends StatelessWidget {
   const InfoTextBox({super.key});
 
@@ -242,42 +243,45 @@ class InfoTextBox extends StatelessWidget {
       ),
       child: Scrollbar(
         thumbVisibility: true,
+        thickness: 6,
+        radius: const Radius.circular(8),
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-             
               const SizedBox(height: 12),
 
-              // Transcription Section
               _buildSection(
-                title: "1️⃣ Transcription",
+                title: "1️⃣ Transcribe",
                 description: [
-                  "- Offered for free to all users.",
-                  "- Accurately captures audio into text in real-time.",
-
+                  "🎤 Accurately capture audio into text in real-time.",
+                  "💼 Free tier available for all users.",
                 ],
                 icon: Icons.mic,
               ),
+              const SizedBox(height: 16),
 
-              // Speech Section
               _buildSection(
-                title: "2️⃣ Speech",
+                title: "2️⃣ Speak",
                 description: [
-                  "- Speech can be issued in real-time as transcription occurs.",
-                  "- Customizable from tone, speech pace, loudness, accent, etc.",
+                  "🗣️ Transcription will occur simultaneously.",
+                  "🎭 Speech can be issued in real-time based on a persona.",
+                  "⚙️ Customize your persona's tone, speech pace, loudness, accent, etc.",
                 ],
                 icon: Icons.volume_up,
               ),
+              const SizedBox(height: 16),
 
-              // Buddy Section
               _buildSection(
                 title: "3️⃣ Buddy",
                 description: [
-                  "- This mode can do all of the previous modes at once.",
-                  "- Give Buddy your goal and we'll will handle the rest.",
-                  
-                 
+                  "🤖 This mode can do all of the previous modes at once.",
+                  "📜 Watch as transcription occurs and give Buddy your goal.",
+                  "🎨 Customize Buddy with a personality and knowledge base.",
+                  "🤝 Buddy will ask for your decisions in real-time.",
+                  "🛠️ Turn off Buddy and issue speech manually when needed.",
+                  "🌐 Buddy can autonomously bridge communication gaps.",
                 ],
                 icon: Icons.person,
               ),
@@ -293,43 +297,49 @@ class InfoTextBox extends StatelessWidget {
     required List<String> description,
     required IconData icon,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: const Color(0xFF0D47A1), size: 20),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0D47A1),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          for (String line in description)
-            Padding(
-              padding: const EdgeInsets.only(left: 28.0, bottom: 6.0),
-              child: Text(
-                line,
-                style: const TextStyle(
-                  fontSize: 15,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.blueAccent),
+            const SizedBox(width: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
             ),
-        ],
-      ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ...description.map(
+          (text) => Padding(
+            padding: const EdgeInsets.only(left: 32.0, bottom: 6.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "• ",
+                  style: TextStyle(fontSize: 16, color: Colors.black87),
+                ),
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
+
 
 
 class OnboardingFlow extends StatefulWidget {
@@ -540,7 +550,7 @@ Widget _buildImageGrid(
 
      if (showAuthenticatedWidgets)
     {'type': 'widget', 'widget': _CreditsWidget(jwt: jwtToken)}, // Credits Widget
-     if (showAuthenticatedWidgets)
+   
   {'type': 'widget', 'widget':  LanguageWidget(
             jwtToken: jwtToken
           ),
@@ -575,7 +585,7 @@ Widget _buildImageGrid(
         ),
       ),
     },   
-     if (showAuthenticatedWidgets)
+   
           {'type': 'widget', 'widget': Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -591,7 +601,7 @@ Widget _buildImageGrid(
           padding: const EdgeInsets.all(6),
           child:ProfileModal(jwtToken: jwtToken)    ),
          }, // Credits Widget
-    if (showAuthenticatedWidgets)
+  
       {'type': 'widget', 'widget': Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -614,7 +624,7 @@ Widget _buildImageGrid(
    
    
    {'type': 'combined', 'widget':  const WhoIsBuddy2Widget(), },
-    if (showAuthenticatedWidgets)
+    
          {'type': 'widget', 'widget': 
  BuyCreditsWidget(
      jwtToken:jwtToken)
@@ -1087,7 +1097,7 @@ class Celebration2Dialog extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
-                  "🎉 Welcome! 🎉",
+                  "🎉 Added! 🎉",
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -1657,11 +1667,11 @@ Widget build(BuildContext context) {
         end: Alignment.bottomRight,
       ),
       borderRadius: BorderRadius.circular(12),
-      boxShadow:const[
-         BoxShadow(
+      boxShadow: const [
+        BoxShadow(
           color: Colors.black26,
           blurRadius: 8,
-          offset:  Offset(0, 4),
+          offset: Offset(0, 4),
         ),
       ],
     ),
@@ -1684,12 +1694,21 @@ Widget build(BuildContext context) {
           fit: BoxFit.contain,
         ),
         const SizedBox(height: 23),
+
         // Button for Buying Credits
         Stack(
           alignment: Alignment.center,
           children: [
             ElevatedButton(
-              onPressed: _isLoading ? null : _handleTap,
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      if (widget.jwtToken.trim().isEmpty) {
+                        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                        return;
+                      }
+                      _handleTap();
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
@@ -1702,7 +1721,6 @@ Widget build(BuildContext context) {
               ),
               child: _isLoading
                   ? const SizedBox(
-                        
                       height: 20,
                       width: 24,
                       child: CircularProgressIndicator(
@@ -1711,10 +1729,8 @@ Widget build(BuildContext context) {
                       ),
                     )
                   : const Row(
-                     mainAxisSize: MainAxisSize.min,
-                      children:  [
-                        
-                        
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
                           "Credits",
                           style: TextStyle(
@@ -1728,11 +1744,17 @@ Widget build(BuildContext context) {
             Positioned(
               left: 77,
               child: GestureDetector(
-                onTap: () => _showInfoDialog(
-                  context,
-                  "",
-                  "Tap the button for a one time credit refill. Credits purchased here can be used for any purpose.",
-                ),
+                onTap: () {
+                  if (widget.jwtToken.trim().isEmpty) {
+                    _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                    return;
+                  }
+                  _showInfoDialog(
+                    context,
+                    "",
+                    "Tap the button for a one-time credit refill. Credits purchased here can be used for any purpose.",
+                  );
+                },
                 child: const Icon(
                   Icons.info_outline,
                   size: 11,
@@ -1743,12 +1765,21 @@ Widget build(BuildContext context) {
           ],
         ),
         const SizedBox(height: 18),
+
         // Button for Subscriptions
         Stack(
           alignment: Alignment.centerRight,
           children: [
             ElevatedButton(
-              onPressed: _isLoading ? null : () => _showSubscriptionOptions(context),
+              onPressed: _isLoading
+                  ? null
+                  : () {
+                      if (widget.jwtToken.trim().isEmpty) {
+                        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                        return;
+                      }
+                      _showSubscriptionOptions(context);
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
@@ -1770,10 +1801,8 @@ Widget build(BuildContext context) {
                       ),
                     )
                   : const Row(
-                    mainAxisSize: MainAxisSize.min,
-                      children:  [
-     
-                   
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
                         Text(
                           "Subscriptions",
                           style: TextStyle(
@@ -1787,11 +1816,17 @@ Widget build(BuildContext context) {
             Positioned(
               left: 120,
               child: GestureDetector(
-                onTap: () => _showInfoDialog(
-                  context,
-                  "",
-                  "Click for a one month subscription. You will receive an increase in daily credit refill amount, priority queue, and make your refills all premium credits. Use the 'How it works' widget. *Lasts one month from purchase; Purchase again if needed.*",
-                ),
+                onTap: () {
+                  if (widget.jwtToken.trim().isEmpty) {
+                    _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                    return;
+                  }
+                  _showInfoDialog(
+                    context,
+                    "",
+                    "Click for a one-month subscription. You will receive an increase in daily credit refill amount, priority queue, and make your refills all premium credits. Use the 'How it works' widget. *Lasts one month from purchase; Purchase again if needed.*",
+                  );
+                },
                 child: const Icon(
                   Icons.info_outline,
                   size: 11,
@@ -2303,7 +2338,7 @@ class LanguageWidgetState extends State<LanguageWidget> {
     } catch (e) {
       debugPrint("Error loading languages: $e");
            if (mounted) {
-      _showSnackBar(context, "Failed to load languages.");
+   
            }
     } finally {
       setState(() {
@@ -2446,7 +2481,6 @@ class LanguageWidgetState extends State<LanguageWidget> {
             ),
           );
   }
-
   Widget _buildSection({
     required String title,
     required String? value,
@@ -2469,10 +2503,10 @@ class LanguageWidgetState extends State<LanguageWidget> {
             const SizedBox(width: 8),
             GestureDetector(
               onTap: () => _showInfoDialog(context, title, infoMessage),
-              child:  Icon(
+              child: Icon(
                 Icons.info_outline,
                 size: 14,
-                color:  Colors.grey[250],
+                color: Colors.grey[250],
               ),
             ),
           ],
@@ -2490,13 +2524,21 @@ class LanguageWidgetState extends State<LanguageWidget> {
               borderSide: BorderSide.none,
             ),
           ),
-          onChanged: onChanged,
+          onChanged: (newValue) {
+            if (widget.jwtToken.trim().isEmpty) {
+              _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+            } else {
+              onChanged(newValue);
+            }
+          },
           items: supportedLanguages.entries
               .map(
                 (entry) => DropdownMenuItem(
                   value: entry.key,
-                  child: Text(entry.value ,  style: const TextStyle(fontSize: 12),),
-               
+                  child: Text(
+                    entry.value,
+                    style: const TextStyle(fontSize: 12),
+                  ),
                 ),
               )
               .toList(),
@@ -2504,6 +2546,7 @@ class LanguageWidgetState extends State<LanguageWidget> {
       ],
     );
   }
+
 }
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});

@@ -204,6 +204,13 @@ class _KnowledgeBaseModalState extends State<KnowledgeBaseModal> {
 Widget build(BuildContext context) {
   return GestureDetector(
     onTap: () {
+      if (widget.jwtToken.trim().isEmpty) {
+        // Show login-required dialog if jwtToken is empty
+        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+        return;
+      }
+
+      // If jwtToken is valid, proceed with opening the knowledge form
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -213,17 +220,28 @@ Widget build(BuildContext context) {
         ),
       );
     },
- 
-        child: Image.asset(
-          'assets/images/knowledicon.png',
-        
-          width: 30, // Adjust size to fit within the CircleAvatar
-          height: 30 ,
-        ),
-  
+    child: Image.asset(
+      'assets/images/knowledicon.png',
+      width: 30,
+      height: 30,
+    ),
   );
 }
-
+void _showInfoDialog(BuildContext context, String title, String message) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text("Okay"),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _buildKnowledgeForm() {
 
