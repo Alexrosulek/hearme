@@ -13,9 +13,43 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'profile.dart';
 import 'dart:async'; // Import for Timer
 import 'dart:ui';
+Future<bool> getTokennew() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('new');
+  
+  if (token == null) {
+    // If the token is null, save it as 'true' and return true
+    await saveTokennew('false');
+    return true;
+  }
+  if (token == 'false'){
+    return false;
+  }
+   if (token == 'true'){
+    return true;
+  }
+  return true;
+  // If token exists, return false
+
+}
+
+Future<void> saveTokennew(String token) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('new', token);
+}
+
+
+  Future<void> clearTokennew() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('new');
+  }
 class HomePage extends StatefulWidget {
   final String jwt;
-  const HomePage({super.key, required this.jwt});
+  final VoidCallback onNavigateToLogin;
+
+
+
+  const HomePage({super.key, required this.jwt,   required this.onNavigateToLogin,});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -31,15 +65,29 @@ bool _isonboarded = false;
   /// Control whether to show the celebration animation
   final bool _showCelebration = false;
 
-  @override
-  void initState() {
-    super.initState();
-  
-    _fetchUserData();
+@override
+void initState() {
+  super.initState();
+  _initializeUserData();
+
       SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
     ]);
   }
+
+Future<void> _initializeUserData() async {
+  if (widget.jwt.trim().isNotEmpty) {
+    _fetchUserData();
+  } else {
+    final isNewUser = await getTokennew();
+    setState(() {
+      _isNewUser = isNewUser;
+      _isFreeSubscription = true;
+    });
+  }
+}
+
+
  @override
   void dispose() {
     // Unlock orientation when leaving HomePage
@@ -123,6 +171,7 @@ bool _isonboarded = false;
   @override
   Widget build(BuildContext context) {
     // 1) Still loading user info
+    
     if (_isNewUser == null || _isFreeSubscription == null) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -134,7 +183,7 @@ bool _isonboarded = false;
       return Scaffold(
         body: Stack (children: [
           // Background content (image grid)
-          _buildImageGrid(context, widget.jwt),
+          _buildImageGrid(context, widget.jwt, widget.onNavigateToLogin),
 
           // Celebration Dialog (conditionally displayed)
           CelebrationDialog(
@@ -162,7 +211,7 @@ else{
     return Scaffold(
       // Remove the AppBar if you want truly full screen
       body: Center(
-        child: _buildImageGrid(context, widget.jwt),
+        child: _buildImageGrid(context, widget.jwt, widget.onNavigateToLogin),
       ),
     );
   }
@@ -413,11 +462,85 @@ double _calculateChildAspectRatio(BuildContext context) {
 
 
 
+class LoginWidget extends StatelessWidget {
+  final VoidCallback onNavigateToLogin;
+
+    const LoginWidget({super.key,required this.onNavigateToLogin});
 
 
-Widget _buildImageGrid(BuildContext context, String jwtToken) {
+  @override
+  Widget build(BuildContext context) {
+    // We’re wrapping everything in a Container so we can add a background gradient
+    return 
+      
+      Center(
+        // Wrap the login controls in a Card for a nice elevated look
+        child: Card(
+          elevation: 8,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          margin: const EdgeInsets.symmetric(horizontal: 10),
+          child: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: Column(
+              // Make sure we only take as much vertical space as needed
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Want Access?',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+               
+                const SizedBox(height: 24),
+                ElevatedButton(
+                 
+                  onPressed: onNavigateToLogin,
+                 child: const Text('Login',
+  style:  TextStyle(
+    color: Colors.black54,
+
+   
+  ),),
+                  
+               
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+  
+  }
+}
+
+
+Widget _buildImageGrid(
+  BuildContext context,
+  String jwtToken,
+  VoidCallback onNavigateToLogin,
+) {
+  // If jwtToken is empty => show LoginWidget instead of the authenticated widgets
+  final bool showAuthenticatedWidgets = jwtToken.trim().isNotEmpty;
+
   final List<Map<String, dynamic>> gridItems = [
+    // If user is not authenticated, show the LoginWidget
+    if (!showAuthenticatedWidgets)
+      {
+        'type': 'widget',
+        'widget': LoginWidget(
+          onNavigateToLogin: onNavigateToLogin,
+        ),
+      },
+
+
+     if (showAuthenticatedWidgets)
     {'type': 'widget', 'widget': _CreditsWidget(jwt: jwtToken)}, // Credits Widget
+     if (showAuthenticatedWidgets)
   {'type': 'widget', 'widget':  LanguageWidget(
             jwtToken: jwtToken
           ),
@@ -452,6 +575,7 @@ Widget _buildImageGrid(BuildContext context, String jwtToken) {
         ),
       ),
     },   
+     if (showAuthenticatedWidgets)
           {'type': 'widget', 'widget': Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -467,7 +591,7 @@ Widget _buildImageGrid(BuildContext context, String jwtToken) {
           padding: const EdgeInsets.all(6),
           child:ProfileModal(jwtToken: jwtToken)    ),
          }, // Credits Widget
-   
+    if (showAuthenticatedWidgets)
       {'type': 'widget', 'widget': Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -490,6 +614,7 @@ Widget _buildImageGrid(BuildContext context, String jwtToken) {
    
    
    {'type': 'combined', 'widget':  const WhoIsBuddy2Widget(), },
+    if (showAuthenticatedWidgets)
          {'type': 'widget', 'widget': 
  BuyCreditsWidget(
      jwtToken:jwtToken)
@@ -612,6 +737,7 @@ class __CreditsWidgetState extends State<_CreditsWidget> {
   }
 
   Future<void> _initializeData() async {
+    
     await _fetchSubscriptionData();
     await _fetchAndSetRefreshTimer();
   }
@@ -1943,20 +2069,32 @@ Widget _buildVerticalTable2(String title, List<String> headers, List<Widget> row
       ],
       const Divider(color: Colors.black12, thickness: 1),
       // Header Row with Icons
-      Row(
-        children: headers.asMap().entries.map((entry) {
-          int index = entry.key;
-          return Expanded(
-            child: index == 0
-                ? const SizedBox() // Leave the first header empty
-                : Icon(
-                    Icons.star,
-                    color: iconColors[index],
-                    size: 18,
+     // Header Row with Icons or "Free" text
+Row(
+  children: headers.asMap().entries.map((entry) {
+    int index = entry.key;
+    return Expanded(
+      child: index == 0
+          ? const SizedBox() // Leave the first header empty
+          : index == 1
+              ? const Text( // For Free tier, show text instead of icon
+                  'Free',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
                   ),
-          );
-        }).toList(),
-      ),
+                  textAlign: TextAlign.center,
+                )
+              : Icon(
+                  Icons.star,
+                  color: iconColors[index],
+                  size: 18,
+                ),
+    );
+  }).toList(),
+),
+
       const Divider(color: Colors.black12, thickness: 1),
       // Rows
       ...rows,
@@ -2397,7 +2535,7 @@ class WelcomePage extends StatelessWidget {
             // Welcome Text
               const SizedBox(height: 8),
             const Text(
-              "Credits Added!",
+              "Welcome!",
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,

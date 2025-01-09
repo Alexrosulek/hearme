@@ -21,8 +21,10 @@ enum ChatMode { off, translation, gptAudio, talkManual }
 
 class ChatModule extends StatefulWidget {
   final String title;
+  final VoidCallback onNavigateToLogin; // callback type
+  const ChatModule({super.key, required this.title,   required this.onNavigateToLogin,});
 
-  const ChatModule({super.key, this.title = "AI Audio Bot"});
+
 
   @override
   ChatModuleState createState() => ChatModuleState();
@@ -62,6 +64,7 @@ bool _isSending = false;
   String _roomName = "";
 
   bool _stickyButtonPressed = false; 
+  
 @override
 void initState() {
   super.initState();
@@ -99,6 +102,8 @@ Future<void> _initSoundPlayer() async {
  
 }
     _jwtToken = await _getToken();
+    _jwtToken ??= '';
+
     _roomName = _generateRoomName();
     
     if (_currentMode != ChatMode.off && _activeSocket == null) await _connectToPool();
@@ -161,7 +166,7 @@ void _stopAudioStreaming() async {
   
 
   Future<void> _connectToPool() async {
-      if (_jwtToken == null || _currentMode == ChatMode.off || _activeSocket != null) {
+      if ( _currentMode == ChatMode.off || _activeSocket != null) {
     return;
   }
 
@@ -193,6 +198,7 @@ void _connectWebSocket(String url) {
 
 
 void _handleModeChange(ChatMode mode) async {
+
    if (mode != ChatMode.off) {
     // Ensure no reconnections
     _stopPollingForOffState();
@@ -237,6 +243,13 @@ void _handleModeChange(ChatMode mode) async {
     // Make absolutely sure no reconnects are triggered
     return;
   }
+
+  if (_jwtToken == '' || _jwtToken == null){
+    _handleModeChange(ChatMode.off);
+_showErrorPopup("Please login to use this feature.");
+
+  }
+
   // Re-initialize WebSocket for active modes
   if (mode == ChatMode.translation || mode == ChatMode.gptAudio || mode == ChatMode.talkManual) {
     await _initialize();
@@ -1514,7 +1527,7 @@ Icon(
     ),
     if (_currentMode == ChatMode.off)
             
-                 HomePage(jwt:_jwtToken!), // HomePage is rendered directly
+                 HomePage(jwt:_jwtToken!,  onNavigateToLogin: widget.onNavigateToLogin) // HomePage is rendered directly
              ]
      ) );
 }

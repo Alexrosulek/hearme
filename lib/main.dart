@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/login': (context) => const LoginPage(), // Login page route
       
-      '/home': (BuildContext context)  => const HomePage(),
+      '/home': (context)  => const HomePage(),
        '/settings': (context) => const SettingsPage(),
       },
        );
@@ -453,18 +453,56 @@ isLaunchingBrowser = true; // Mark that we're launching a browser
                     const CircularProgressIndicator()
                   else
                     Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: _loginWithGoogle,
-                          child: const Text('Login or Register with Google'),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: _loginWithApple,
-                          child: const Text('Login or Register with Apple'),
-                        ),
-                      ],
-                    ),
+  children: [
+    // Google Button with Icon
+    ElevatedButton.icon(
+      onPressed: _loginWithGoogle,
+      icon: Image.asset(
+        'assets/images/google.png',
+        height: 24,
+        width: 24,
+      ),
+      label: const Text('Continue with Google'),
+        style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      ),
+    ),
+    const SizedBox(height: 8),
+
+    // Apple Button with Icon
+    ElevatedButton.icon(
+      onPressed: _loginWithApple,
+      icon: const Icon(
+        Icons.apple,
+        size: 20,
+        color: Colors.black,
+      ),
+      label: const Text('Continue with Apple'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      ),
+    ),
+    const SizedBox(height: 8),
+
+    // Guest Button
+    ElevatedButton(
+      onPressed: _navigateToHomePage,
+     
+        style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+        
+      ),
+       child: const Text('Continue as Guest'),
+    ),
+  ],
+),
+
                 ],
               ),
             ),
@@ -505,14 +543,27 @@ class HomePageState extends State<HomePage> {
   
     super.dispose();
   }
+  /// Navigate to Login Page
+  void _navigateToLoginPage() {
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginPage(),
+        ),
+      );
+    }
+  }
 
-@override
-Widget build(BuildContext context, {bool isHomePage = true}) {
-  return const Scaffold(
-    
-    body:  ChatModule(title: "AI Chat Bot"),
-  );
-}
+  @override
+  Widget build(BuildContext context, {bool isHomePage = true}) {
+    return Scaffold(
+      body: ChatModule(
+        title: "AI Chat Bot",
+        onNavigateToLogin: _navigateToLoginPage, // Pass the callback here
+      ),
+    );
+  }
 
 
 
@@ -629,12 +680,7 @@ class SettingsPageState extends State<SettingsPage> {
             'Privacy Policy',
             () => _launchURL('https://www.hearme.services/terms'),
           ),
-          const SizedBox(height: 16),
-          _buildSettingsOption(
-            context,
-            'Delete Account',
-            () => _confirmDeleteAccount(context),
-          ),
+       
 
           const SizedBox(height: 16),
          _buildLogoutButton(context),
@@ -643,29 +689,45 @@ class SettingsPageState extends State<SettingsPage> {
     );
   }
  Widget _buildLogoutButton(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: apiService.isLoggedIn(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator(color: Colors.white);
-        }
+  return FutureBuilder<bool>(
+    future: apiService.isLoggedIn(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const CircularProgressIndicator(color: Colors.white);
+      }
 
-        final isLoggedIn = snapshot.data ?? false;
+      final isLoggedIn = snapshot.data ?? false;
 
-       return ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.deepPurple,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+
+          // Show "Delete Account" button only if logged in
+          if (isLoggedIn)
+            _buildSettingsOption(
+              context,
+              'Delete Account',
+              () => _confirmDeleteAccount(context),
+            ),
+const SizedBox(height: 16),
+          // Show Login/Logout button
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.deepPurple,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            onPressed: () async => _handleLoginOrLogout(context, isLoggedIn),
+            child: Text(isLoggedIn ? 'Logout' : 'Login'),
           ),
-        ),
-        onPressed: () async => _handleLoginOrLogout(context, isLoggedIn),
-        child: Text(isLoggedIn ? 'Logout' : 'Login'),
+        ],
       );
     },
   );
 }
+
 void _showSnackBar(BuildContext context, String message) {
   if (context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
