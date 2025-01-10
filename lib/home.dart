@@ -2323,11 +2323,13 @@ class LanguageWidgetState extends State<LanguageWidget> {
   }
 
   Future<void> _loadLanguages() async {
+       if (widget.jwtToken.trim().isNotEmpty) {
     setState(() {
       _isLoading = true;
     });
 
     try {
+      
       final currentLangResponse = await _getLanguage('/getlang');
       final targetLangResponse = await _getLanguage('/gettargetlang');
 
@@ -2345,7 +2347,7 @@ class LanguageWidgetState extends State<LanguageWidget> {
         _isLoading = false;
       });
     }
-  }
+  }}
 
   Future<String> _getLanguage(String endpoint) async {
     final response = await http.post(

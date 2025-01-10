@@ -24,7 +24,9 @@ class _KnowledgeBaseModalState extends State<KnowledgeBaseModal> {
   @override
   void initState() {
     super.initState();
+     if (widget.jwtToken.trim().isNotEmpty) {
     _fetchKnowledgeEntries(); // Load existing entries initially
+     }
   }
 
   /// Info icon dialog helper

@@ -10,6 +10,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'chat.dart';
 import 'api_service.dart';
 
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'dart:ui';
 
 
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-       home: const HomePage(), // Default home page
+       home: const LoginPage(), // Default home page
        scaffoldMessengerKey: scaffoldMessengerKey,
       navigatorObservers: [routeObserver], // Route observer
       routes: {
@@ -680,7 +681,12 @@ class SettingsPageState extends State<SettingsPage> {
             'Privacy Policy',
             () => _launchURL('https://www.hearme.services/terms'),
           ),
-       
+            const SizedBox(height: 16),
+        _buildSettingsOption(
+  context,
+  'Restore Purchases',
+  _restorePurchases, // We'll define this method next
+),
 
           const SizedBox(height: 16),
          _buildLogoutButton(context),
@@ -883,8 +889,80 @@ Future<bool> _deleteAccount() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('jwt_token');
   }
-  
+  Future<void> _restorePurchases() async {
+  try {
+
+
+    // 1) Check if store is available
+    final bool storeAvailable = await InAppPurchase.instance.isAvailable();
+   
+    if (!storeAvailable) {
+      _showMessage('The App Store is not available right now. Please try again later.');
+      return;
+    }
+
+    final InAppPurchase iapConnection = InAppPurchase.instance;
+
+    // We’ll track if any purchase was actually restored
+    bool anyRestored = false;
+    // Temporary subscription to watch for restore events
+    late final StreamSubscription<List<PurchaseDetails>> sub;
+
+    sub = iapConnection.purchaseStream.listen(
+      (purchases) {
+        for (final purchase in purchases) {
+          if (purchase.status == PurchaseStatus.restored) {
+            // If Apple returns a restored purchase, mark flag
+          
+            anyRestored = true;
+          }
+        }
+      },
+      onError: (error) {
+     
+      },
+      onDone: () => sub.cancel(),
+    );
+
+
+    // 2) Attempt to restore purchases from Apple
+    await iapConnection.restorePurchases();
+
+    // 3) Give Apple a brief moment to send purchaseStream updates
+    //    If no purchases come in, anyRestored stays false.
+    await Future.delayed(const Duration(seconds: 2));
+
  
+    // 4) Call your server, regardless of whether anything was restored
+    final token = await getToken();
+
+    if (token == null) {
+      _showMessage('Please login to your Transcribe & Talk account to restore your purchases.');
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('https://www.hearme.services/subscription/restore'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      // If we got at least one restored item, show success. Otherwise, inform user no purchases found
+      if (anyRestored) {
+        _showMessage('Purchases successfully restored!');
+      } else {
+        _showMessage('No purchases found to restore.');
+      }
+    } else {
+      _showMessage('Something went wrong restoring purchases on the server.');
+    }
+
+  } catch (e) {
+   
+    _showMessage('Failed to restore purchases: $e');
+  }
+}
+
 
   Future<void> clearToken() async {
     final prefs = await SharedPreferences.getInstance();

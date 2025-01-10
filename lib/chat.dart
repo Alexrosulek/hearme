@@ -159,10 +159,16 @@ void _stopAudioStreaming() async {
 
   String _generateRoomName() => _uuid.v4();
 
-  Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
+Future<String> _getToken() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('jwt_token');
+  
+  if (token == null || token.trim().isEmpty) {
+    return '';
   }
+  return token;
+}
+
   
 
   Future<void> _connectToPool() async {

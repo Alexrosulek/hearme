@@ -121,7 +121,9 @@ final List<String> _accents = [
   @override
   void initState() {
     super.initState();
+     if (widget.jwtToken.trim().isNotEmpty) {
     _fetchUserInfo();
+     }
   }
 
   Future<void> _fetchUserInfo() async {
