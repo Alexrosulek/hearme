@@ -251,12 +251,22 @@ class InfoTextBox extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 12),
+              const Padding(
+  padding:  EdgeInsets.all(8.0), // Add uniform padding
+  child:  Text(
+    'Have 150 premium credits on us, so you can try all features out!',
+    style: TextStyle(
+      fontSize: 14, // Optional: Adjust font size for better readability
+    ),
+  ),
+),
 
+          const SizedBox(height: 2),
               _buildSection(
                 title: "1️⃣ Transcribe",
                 description: [
                   "🎤 Accurately capture audio into text in real-time.",
-                  "💼 Free tier available for all users.",
+                  "💼 Available free for all users.",
                 ],
                 icon: Icons.mic,
               ),
@@ -265,9 +275,8 @@ class InfoTextBox extends StatelessWidget {
               _buildSection(
                 title: "2️⃣ Speak",
                 description: [
-                  "🗣️ Transcription will occur simultaneously.",
-                  "🎭 Speech can be issued in real-time based on a persona.",
-                  "⚙️ Customize your persona's tone, speech pace, loudness, accent, etc.",
+                  "🗣️ Capture audio into text and issue text-to-speech at the same time, in real-time.",
+                  "⚙️ Customize your tone, pace, loudness, accent, etc.",
                 ],
                 icon: Icons.volume_up,
               ),
@@ -277,11 +286,10 @@ class InfoTextBox extends StatelessWidget {
                 title: "3️⃣ Buddy",
                 description: [
                   "🤖 This mode can do all of the previous modes at once.",
-                  "📜 Watch as transcription occurs and give Buddy your goal.",
-                  "🎨 Customize Buddy with a personality and knowledge base.",
-                  "🤝 Buddy will ask for your decisions in real-time.",
-                  "🛠️ Turn off Buddy and issue speech manually when needed.",
-                  "🌐 Buddy can autonomously bridge communication gaps.",
+                  "📜 Give Buddy your goal.",
+                  "🎨 Customize Buddy and give add knowledge base.",
+                  "🤝 Buddy will ask for your decisions when needed.",
+                  "🌐 Buddy can autonomously bridge communication gaps as a proxy.",
                 ],
                 icon: Icons.person,
               ),
@@ -513,6 +521,7 @@ class LoginWidget extends StatelessWidget {
                  child: const Text('Login',
   style:  TextStyle(
     color: Colors.black54,
+    fontSize: 10
 
    
   ),),
@@ -1000,7 +1009,7 @@ Text(
                   title,
                   style: const TextStyle(
                     color: Colors.black54,
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -1009,7 +1018,7 @@ Text(
                   value,
                   style: const TextStyle(
                     color: Colors.black87,
-                    fontSize: 13,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -1694,148 +1703,135 @@ Widget build(BuildContext context) {
           fit: BoxFit.contain,
         ),
         const SizedBox(height: 23),
-
-        // Button for Buying Credits
-        Stack(
-          alignment: Alignment.center,
+// Button for Buying Credits
+ElevatedButton(
+  onPressed: _isLoading
+      ? null
+      : () {
+          if (widget.jwtToken.trim().isEmpty) {
+            _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+            return;
+          }
+          _handleTap();
+        },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+    shadowColor: Colors.black45,
+    elevation: 5,
+  ),
+  child: _isLoading
+      ? const SizedBox(
+          height: 20,
+          width: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+          ),
+        )
+      : Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      if (widget.jwtToken.trim().isEmpty) {
-                        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
-                        return;
-                      }
-                      _handleTap();
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                shadowColor: Colors.black45,
-                elevation: 5,
+            const Text(
+              "Credits",
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-                      ),
-                    )
-                  : const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Credits",
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
             ),
-            Positioned(
-              left: 77,
-              child: GestureDetector(
-                onTap: () {
-                  if (widget.jwtToken.trim().isEmpty) {
-                    _showInfoDialog(context, "Login Required", "Please login to use this feature.");
-                    return;
-                  }
-                  _showInfoDialog(
-                    context,
-                    "",
-                    "Tap the button for a one-time credit refill. Credits purchased here can be used for any purpose.",
-                  );
-                },
-                child: const Icon(
-                  Icons.info_outline,
-                  size: 11,
-                  color: Colors.black,
-                ),
+            const SizedBox(width: 8), // Spacing between text and icon
+            GestureDetector(
+              onTap: () {
+                if (widget.jwtToken.trim().isEmpty) {
+                  _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                  return;
+                }
+                _showInfoDialog(
+                  context,
+                  "",
+                  "Tap the button for a one-time credit refill. Credits purchased here can be used for any purpose.",
+                );
+              },
+              child: const Icon(
+                Icons.info_outline,
+                size: 14, // Adjusted size for visibility
+                color: Colors.black,
               ),
             ),
           ],
         ),
+),
+
         const SizedBox(height: 18),
 
-        // Button for Subscriptions
-        Stack(
-          alignment: Alignment.centerRight,
+       // Button for Subscriptions
+ElevatedButton(
+  onPressed: _isLoading
+      ? null
+      : () {
+          if (widget.jwtToken.trim().isEmpty) {
+            _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+            return;
+          }
+          _showSubscriptionOptions(context);
+        },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    foregroundColor: Colors.black,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+    shadowColor: Colors.black45,
+    elevation: 5,
+  ),
+  child: _isLoading
+      ? const SizedBox(
+          height: 20,
+          width: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(
+                Color.fromARGB(255, 62, 130, 246)),
+          ),
+        )
+      : Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () {
-                      if (widget.jwtToken.trim().isEmpty) {
-                        _showInfoDialog(context, "Login Required", "Please login to use this feature.");
-                        return;
-                      }
-                      _showSubscriptionOptions(context);
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                shadowColor: Colors.black45,
-                elevation: 5,
+            const Text(
+              "Subscription",
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.bold,
               ),
-              child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Color.fromARGB(255, 62, 130, 246)),
-                      ),
-                    )
-                  : const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Subscriptions",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
             ),
-            Positioned(
-              left: 120,
-              child: GestureDetector(
-                onTap: () {
-                  if (widget.jwtToken.trim().isEmpty) {
-                    _showInfoDialog(context, "Login Required", "Please login to use this feature.");
-                    return;
-                  }
-                  _showInfoDialog(
-                    context,
-                    "",
-                    "Click for a one-month subscription. You will receive an increase in daily credit refill amount, priority queue, and make your refills all premium credits. Use the 'How it works' widget. *Lasts one month from purchase; Purchase again if needed.*",
-                  );
-                },
-                child: const Icon(
-                  Icons.info_outline,
-                  size: 11,
-                  color: Colors.black,
-                ),
+            const SizedBox(width: 8), // Spacing between text and icon
+            GestureDetector(
+              onTap: () {
+                if (widget.jwtToken.trim().isEmpty) {
+                  _showInfoDialog(context, "Login Required", "Please login to use this feature.");
+                  return;
+                }
+                _showInfoDialog(
+                  context,
+                  "",
+                  "Click for a one-month subscription. You will receive an increase in daily credit refill amount, priority queue, and make your refills all premium credits. Use the 'How it works' widget. *Lasts one month from purchase; Purchase again if needed.*",
+                );
+              },
+              child: const Icon(
+                Icons.info_outline,
+                size: 14, // Adjust size for better visibility
+                color: Colors.black,
               ),
             ),
           ],
         ),
+),
+
       ],
     ),
   );
@@ -1907,7 +1903,7 @@ class WhoIsBuddyWidget extends StatelessWidget {
                     const Text(
                       "Who is 'Buddy'?",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 15,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -1916,7 +1912,7 @@ class WhoIsBuddyWidget extends StatelessWidget {
 
                     // Explanation of Buddy
                     const Text(
-                      "Buddy is a personalized conversational assistant. Buddy is smart and has a lot of tools at its disposal to effectively help handle the world around you.",
+                      "Buddy is a personal conversational assistant. Buddy is smart and has a lot of tools at its disposal to effectively help handle the world around you.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 12,
@@ -1993,7 +1989,7 @@ Widget _buildComparisonChart(BoxConstraints constraints) {
   double availableWidth = constraints.maxWidth;
 
   // Scaling factors
-  double fontSize = availableWidth * 0.044; // Scaled font size
+  double fontSize = availableWidth * 0.040; // Scaled font size
   double iconSize = availableWidth * 0.0705; // Scaled icon size
   double cellPadding = 8; // Scaled padding for cells
 
@@ -2117,7 +2113,7 @@ Row(
                   style: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    fontSize: 9.5,
                   ),
                   textAlign: TextAlign.center,
                 )
